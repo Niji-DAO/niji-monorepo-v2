@@ -1189,20 +1189,52 @@ msgid "backgrounds (2)"
 msgstr "backgrounds (2)"
 
 #: src/components/Documentation/index.tsx
-msgid "bodies (30)"
-msgstr "bodies (30)"
+msgid "backDecorations (30)"
+msgstr "backDecorations (30)"
 
 #: src/components/Documentation/index.tsx
-msgid "glasses (23)"
-msgstr "glasses (23)"
+msgid "backgroundDecorations (23)"
+msgstr "backgroundDecorations (23)"
 
 #: src/components/AuctionTimer/index.tsx
 msgid "h"
 msgstr "h"
 
 #: src/components/Documentation/index.tsx
-msgid "heads (242)"
-msgstr "heads (242)"
+msgid "specials (242)"
+msgstr "specials (242)"
+
+#: src/components/Documentation/index.tsx
+msgid "leftHands (242)"
+msgstr "leftHands (242)"
+
+#: src/components/Documentation/index.tsx
+msgid "backs (242)"
+msgstr "backs (242)"
+
+#: src/components/Documentation/index.tsx
+msgid "clothes (242)"
+msgstr "clothes (242)"
+
+#: src/components/Documentation/index.tsx
+msgid "chokers (242)"
+msgstr "chokers (242)"
+
+#: src/components/Documentation/index.tsx
+msgid "ears (242)"
+msgstr "ears (242)"
+
+#: src/components/Documentation/index.tsx
+msgid "hairs (242)"
+msgstr "hairs (242)"
+
+#: src/components/Documentation/index.tsx
+msgid "headphones (242)"
+msgstr "headphones (242)"
+
+#: src/components/Documentation/index.tsx
+msgid "hats (242)"
+msgstr "hats (242)"
 
 #: src/components/AuctionTimer/index.tsx
 msgid "m"

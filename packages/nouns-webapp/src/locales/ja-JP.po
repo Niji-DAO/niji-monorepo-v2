@@ -1190,20 +1190,48 @@ msgid "backgrounds (2)"
 msgstr "背景 (2)"
 
 #: src/components/Documentation/index.tsx
-msgid "bodies (30)"
-msgstr "体 (30)"
+msgid "backDecorations (30)"
+msgstr "背景装飾 (30)"
 
 #: src/components/Documentation/index.tsx
-msgid "glasses (23)"
-msgstr "メガネ (23)"
+msgid "backgroundDecorations (23)"
+msgstr "背中装飾 (23)"
 
 #: src/components/AuctionTimer/index.tsx
 msgid "h"
 msgstr "時間"
 
 #: src/components/Documentation/index.tsx
-msgid "heads (242)"
-msgstr "頭 (242)"
+msgid "leftHands (242)"
+msgstr "左手 (242)"
+
+#: src/components/Documentation/index.tsx
+msgid "backs (242)"
+msgstr "背中 (242)"
+
+#: src/components/Documentation/index.tsx
+msgid "clothes (242)"
+msgstr "服 (242)"
+
+#: src/components/Documentation/index.tsx
+msgid "chokers (242)"
+msgstr "チョーカー (242)"
+
+#: src/components/Documentation/index.tsx
+msgid "ears (242)"
+msgstr "耳 (242)"
+
+#: src/components/Documentation/index.tsx
+msgid "hairs (242)"
+msgstr "髪 (242)"
+
+#: src/components/Documentation/index.tsx
+msgid "headphones (242)"
+msgstr "ヘッドホン (242)"
+
+#: src/components/Documentation/index.tsx
+msgid "hats (242)"
+msgstr "帽子 (242)"
 
 #: src/components/AuctionTimer/index.tsx
 msgid "m"

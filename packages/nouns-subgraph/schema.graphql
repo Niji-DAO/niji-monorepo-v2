@@ -45,17 +45,38 @@ type Seed @entity {
   "The background index"
   background: BigInt!
 
-  "The body index"
-  body: BigInt!
+  "The background decoration index"
+  backgroundDecoration: BigInt!
 
-  "The accessory index"
-  accessory: BigInt!
+  "The back decoration index"
+  backDecoration: BigInt!
 
-  "The head index"
-  head: BigInt!
+  "The special index"
+  special: BigInt!
 
-  "The glasses index"
-  glasses: BigInt!
+  "The left hand index"
+  leftHand: BigInt!
+
+  "The back index"
+  back: BigInt!
+
+  "The clothe index"
+  clothe: BigInt!
+
+  "The chokers index"
+  choker: BigInt!
+
+  "The ear index"
+  ear: BigInt!
+
+  "The hair index"
+  hair: BigInt!
+
+  "The hat index"
+  hat: BigInt!
+
+  "The headphone index"
+  headphone: BigInt!
 }
 
 type Noun @entity {

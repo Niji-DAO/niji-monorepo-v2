@@ -23,3 +23,11 @@ export * from './verify-etherscan-daov2';
 export * from './update-configs-daov2';
 export * from './deploy-short-times-daov1';
 export * from './deploy-and-configure-short-times-daov1';
+
+// niji
+export * from './niji-deploy';
+export * from './niji-deploy-and-configure';
+export * from './niji-deploy-local';
+export * from './niji-mint-noun';
+export * from './niji-populate-descriptor';
+export * from './niji-run-local';

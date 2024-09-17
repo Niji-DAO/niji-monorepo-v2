@@ -218,16 +218,37 @@ const Documentation = () => {
                   <Trans>backgrounds (2) </Trans>
                 </li>
                 <li>
-                  <Trans>bodies (30)</Trans>
+                  <Trans>backDecorations (30)</Trans>
                 </li>
                 <li>
-                  <Trans>accessories (140) </Trans>
+                  <Trans>backgroundDecorations (140) </Trans>
                 </li>
                 <li>
-                  <Trans>heads (242) </Trans>
+                  <Trans>specials (242) </Trans>
                 </li>
                 <li>
-                  <Trans>glasses (23)</Trans>
+                  <Trans>leftHands (23)</Trans>
+                </li>
+                <li>
+                  <Trans>backs (23)</Trans>
+                </li>
+                <li>
+                  <Trans>clothes (23)</Trans>
+                </li>
+                <li>
+                  <Trans>chokers (23)</Trans>
+                </li>
+                <li>
+                  <Trans>ears (23)</Trans>
+                </li>
+                <li>
+                  <Trans>hair (23)</Trans>
+                </li>
+                <li>
+                  <Trans>headphones (23)</Trans>
+                </li>
+                <li>
+                  <Trans>hats (23)</Trans>
                 </li>
               </ul>
               <Trans>

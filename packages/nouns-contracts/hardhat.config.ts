@@ -14,11 +14,12 @@ dotenv.config();
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: '0.8.17',
+    version: '0.8.20',
     settings: {
+      viaIR: true,
       optimizer: {
         enabled: true,
-        runs: 10_000,
+        runs: 200,
       },
     },
   },
@@ -35,6 +36,12 @@ const config: HardhatUserConfig = {
     },
     goerli: {
       url: `https://goerli.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
+      accounts: process.env.MNEMONIC
+        ? { mnemonic: process.env.MNEMONIC }
+        : [process.env.WALLET_PRIVATE_KEY!].filter(Boolean),
+    },
+    base_sepolia: {
+      url: 'https://sepolia.base.org',
       accounts: process.env.MNEMONIC
         ? { mnemonic: process.env.MNEMONIC }
         : [process.env.WALLET_PRIVATE_KEY!].filter(Boolean),

@@ -12,7 +12,9 @@ import {
 import classes from './Playground.module.css';
 import React, { ChangeEvent, ReactNode, useEffect, useRef, useState } from 'react';
 import Link from '../../components/Link';
-import { ImageData, getNounData, getRandomNounSeed } from '@nouns/assets';
+// import { ImageData, getNounData, getRandomNounSeed } from '@nouns/assets';
+import { getNounData, getRandomNounSeed } from '../../utils/assets/utils';
+import ImageData from '../../utils/assets/image-data.json';
 import { buildSVG, EncodedImage, PNGCollectionEncoder } from '@nouns/sdk';
 import InfoIcon from '../../assets/icons/Info.svg';
 import Noun from '../../components/Noun';
@@ -56,15 +58,22 @@ const nounsSDKLink = (
   />
 );
 
-const DEFAULT_TRAIT_TYPE = 'heads';
+const DEFAULT_TRAIT_TYPE = 'backDecoration';
 
 const encoder = new PNGCollectionEncoder(ImageData.palette);
 
 const traitKeyToTitle: Record<string, string> = {
-  heads: 'head',
-  glasses: 'glasses',
-  bodies: 'body',
-  accessories: 'accessory',
+  backDecorations: 'back',
+  backgroundDecorations: 'background',
+  specials: 'special',
+  leftHands: 'leftHand',
+  backs: 'back',
+  clothes: 'clothe',
+  chokers: 'choker',
+  ears: 'ear',
+  hairs: 'hair',
+  headphones: 'headphones',
+  hats: 'hat',
 };
 
 const parseTraitName = (partName: string): string =>
@@ -75,10 +84,17 @@ const capitalizeFirstLetter = (s: string): string => s.charAt(0).toUpperCase() +
 const traitKeyToLocalizedTraitKeyFirstLetterCapitalized = (s: string): ReactNode => {
   const traitMap = new Map([
     ['background', <Trans>Background</Trans>],
-    ['body', <Trans>Body</Trans>],
-    ['accessory', <Trans>Accessory</Trans>],
-    ['head', <Trans>Head</Trans>],
-    ['glasses', <Trans>Glasses</Trans>],
+    ['backDecoration', <Trans>Back Decoration</Trans>],
+    ['backgroundDecoration', <Trans>Background Decoration</Trans>],
+    ['special', <Trans>Special</Trans>],
+    ['leftHand', <Trans>Left Hand</Trans>],
+    ['back', <Trans>Back</Trans>],
+    ['clothe', <Trans>Clothe</Trans>],
+    ['choker', <Trans>Choker</Trans>],
+    ['ear', <Trans>Ear</Trans>],
+    ['hair', <Trans>Hair</Trans>],
+    ['headphone', <Trans>Headphone</Trans>],
+    ['hat', <Trans>Hat</Trans>],
   ]);
 
   return traitMap.get(s);
@@ -113,7 +129,7 @@ const Playground: React.FC = () => {
   );
 
   useEffect(() => {
-    const traitTitles = ['background', 'body', 'accessory', 'head', 'glasses'];
+    const traitTitles = ['background', 'backDecoration', 'backgroundDecoration', 'special', 'leftHand', 'back', 'clothe', 'choker', 'ear', 'hair', 'headphone', 'hat'];
     const traitNames = [
       ['cool', 'warm'],
       ...Object.values(ImageData.images).map(i => {

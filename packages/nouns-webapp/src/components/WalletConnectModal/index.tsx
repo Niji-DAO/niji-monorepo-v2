@@ -91,7 +91,7 @@ const WalletConnectModal: React.FC<{ onDismiss: () => void }> = props => {
             manifestAppUrl: 'https://nouns.wtf',
             manifestEmail: 'nounops+trezorconnect@protonmail.com',
           });
-          activate(trezor);
+          activate(trezor as any);
         }}
         walletType={WALLET_TYPE.trezor}
       />

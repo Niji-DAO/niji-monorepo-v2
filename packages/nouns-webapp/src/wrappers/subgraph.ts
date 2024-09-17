@@ -46,10 +46,17 @@ export const seedsQuery = (first = 1_000) => gql`
   seeds(first: ${first}) {
     id
     background
-    body
-    accessory
-    head
-    glasses
+    backDecoration
+    backgroundDecoration
+    special
+    leftHand
+    back
+    clothe
+    choker
+    ear
+    hair
+    hat
+    headphone
   }
 }
 `;
@@ -96,11 +103,17 @@ export const auctionQuery = (auctionId: number) => gql`
 		id
 		seed {
 		  id
-		  background
-		  body
-		  accessory
-		  head
-		  glasses
+		  backDecoration
+    backgroundDecoration
+    special
+    leftHand
+    back
+    clothe
+    choker
+    ear
+    hair
+    headphones
+    hat
 		}
 		owner {
 		  id
@@ -140,10 +153,17 @@ export const nounQuery = (id: string) => gql`
 	  id
 	  seed {
 	  background
-		body
-		accessory
-		head
-		glasses
+		backDecoration
+    backgroundDecoration
+    special
+    leftHand
+    back
+    clothe
+    choker
+    ear
+    hair
+    headphones
+    hat
 	}
 	  owner {
 		id
@@ -216,7 +236,7 @@ export const latestBidsQuery = (first: number = 10) => gql`
 		settled
 	  }
 	}
-  }  
+  }
 `;
 
 export const nounVotingHistoryQuery = (nounId: number) => gql`
@@ -285,7 +305,7 @@ export const proposalVotesQuery = (proposalId: string) => gql`
         id
       }
 
-    }	
+    }
   }
 `;
 
@@ -322,7 +342,7 @@ export const totalNounSupplyAtPropSnapshot = (proposalId: string) => gql`
 export const propUsingDynamicQuorum = (propoaslId: string) => gql`
 {
   proposal(id: "${propoaslId}") {
-    quorumCoefficient 
+    quorumCoefficient
   }
 }
 `;

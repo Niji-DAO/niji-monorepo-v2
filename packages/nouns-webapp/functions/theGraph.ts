@@ -10,10 +10,17 @@ export interface NormalizedVote {
 
 export interface Seed {
   background: number;
-  body: number;
-  accessory: number;
-  head: number;
-  glasses: number;
+  backDecoration: number;
+  backgroundDecoration: number;
+  special: number;
+  leftHand: number;
+  back: number;
+  clothe: number;
+  choker: number;
+  ear: number;
+  hair: number;
+  headphones: number;
+  hat: number;
 }
 
 export interface NormalizedNoun {
@@ -42,10 +49,17 @@ const nounsGql = `
     }
     seed {
       background
-      body
-      accessory
-      head
-      glasses
+      backDecoration
+      backgroundDecoration
+      special
+      leftHand
+      back
+      clothe
+      choker
+      ear
+      hair
+      headphones
+      hat
     }
   }
 }
@@ -58,10 +72,17 @@ export const normalizeVote = (vote: any): NormalizedVote => ({
 
 export const normalizeSeed = (seed: any): Seed => ({
   background: Number(seed.background),
-  body: Number(seed.body),
-  glasses: Number(seed.glasses),
-  accessory: Number(seed.accessory),
-  head: Number(seed.head),
+  backDecoration: Number(seed.backDecoration),
+  backgroundDecoration: Number(seed.backgroundDecoration),
+  special: Number(seed.special),
+  leftHand: Number(seed.leftHand),
+  back: Number(seed.back),
+  clothe: Number(seed.clothe),
+  choker: Number(seed.choker),
+  ear: Number(seed.ear),
+  hair: Number(seed.hair),
+  headphones: Number(seed.headphones),
+  hat: Number(seed.hat),
 });
 
 export const normalizeNoun = (noun: any): NormalizedNoun => ({

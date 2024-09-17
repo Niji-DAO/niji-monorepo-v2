@@ -1,4 +1,6 @@
-import { ImageData as data, getNounData } from '@nouns/assets';
+// import { ImageData as data, getNounData } from '@nouns/assets';
+import { getNounData } from '../../utils/assets/utils';
+import ImageData from '../../utils/assets/image-data.json';
 import { buildSVG } from '@nouns/sdk';
 import { BigNumber as EthersBN } from 'ethers';
 import { INounSeed, useNounSeed } from '../../wrappers/nounToken';
@@ -27,8 +29,12 @@ export const getNoun = (nounId: string | EthersBN, seed: INounSeed) => {
   const id = nounId.toString();
   const name = `Noun ${id}`;
   const description = `Noun ${id} is a member of the Nouns DAO`;
+  console.log(`getNoun seed: ${seed}`);
   const { parts, background } = getNounData(seed);
-  const image = `data:image/svg+xml;base64,${btoa(buildSVG(parts, data.palette, background))}`;
+  console.log(`getNoun parts: ${JSON.stringify(parts)}`);
+  console.log(`getNoun background: ${background}`);
+  const image = `data:image/svg+xml;base64,${btoa(buildSVG(parts, ImageData.palette, background))}`;
+  console.log(`getNoun image: ${image}`);
 
   return {
     name,
@@ -39,6 +45,7 @@ export const getNoun = (nounId: string | EthersBN, seed: INounSeed) => {
 
 const StandaloneNoun: React.FC<StandaloneNounProps> = (props: StandaloneNounProps) => {
   const { nounId } = props;
+  console.log(`StandaloneNoun nounId: ${nounId}`);
   const seed = useNounSeed(nounId);
   const noun = seed && getNoun(nounId, seed);
 
@@ -122,7 +129,9 @@ export const StandaloneNounWithSeed: React.FC<StandaloneNounWithSeedProps> = (
   const { nounId, onLoadSeed, shouldLinkToProfile } = props;
 
   const dispatch = useDispatch();
+  console.log(`StandaloneNounWithSeed nounId: ${nounId}`);
   const seed = useNounSeed(nounId);
+  console.log(`StandaloneNounWithSeed seed: ${seed}`);
   const seedIsInvalid = Object.values(seed || {}).every(v => v === 0);
 
   if (!seed || seedIsInvalid || !nounId || !onLoadSeed) return <Noun imgPath="" alt="Noun" />;

@@ -25,6 +25,7 @@ import { INounsToken } from './interfaces/INounsToken.sol';
 import { ERC721 } from './base/ERC721.sol';
 import { IERC721 } from '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 import { IProxyRegistry } from './external/opensea/IProxyRegistry.sol';
+import "hardhat/console.sol";
 
 contract NounsToken is INounsToken, Ownable, ERC721Checkpointable {
     // The nounders DAO address (creators org)
@@ -253,6 +254,7 @@ contract NounsToken is INounsToken, Ownable, ERC721Checkpointable {
      * @notice Mint a Noun with `nounId` to the provided `to` address.
      */
     function _mintTo(address to, uint256 nounId) internal returns (uint256) {
+        console.log("mintTo nounId", nounId);
         INounsSeeder.Seed memory seed = seeds[nounId] = seeder.generateSeed(nounId, descriptor);
 
         _mint(owner(), to, nounId);

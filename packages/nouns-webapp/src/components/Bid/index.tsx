@@ -79,6 +79,7 @@ const Bid: React.FC<{
   const setModal = useCallback((modal: AlertModal) => dispatch(setAlertModal(modal)), [dispatch]);
 
   const minBidIncPercentage = useAuctionMinBidIncPercentage();
+  console.log(`minBidIncPercentage: ${minBidIncPercentage}`);
   const minBid = computeMinimumNextBid(
     auction && new BigNumber(auction.amount.toString()),
     minBidIncPercentage,
@@ -125,7 +126,11 @@ const Bid: React.FC<{
     }
 
     const value = utils.parseEther(bidInputRef.current.value.toString());
-    const contract = connectContractToSigner(nounsAuctionHouseContract, undefined, library);
+    const contract = connectContractToSigner(
+      nounsAuctionHouseContract,
+      undefined,
+      library && 'getSigner' in library ? library.getSigner() : undefined,
+    );
     const gasLimit = await contract.estimateGas.createBid(auction.nounId, {
       value,
     });

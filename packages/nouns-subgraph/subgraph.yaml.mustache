@@ -55,7 +55,7 @@ dataSources:
         - name: NounsToken
           file: ../nouns-contracts/abi/contracts/NounsToken.sol/NounsToken.json
       eventHandlers:
-        - event: NounCreated(indexed uint256,(uint48,uint48,uint48,uint48,uint48))
+        - event: NounCreated(indexed uint256,(uint48,uint48,uint48,uint48,uint48,uint48,uint48,uint48,uint48,uint48,uint48,uint48))
           handler: handleNounCreated
         - event: DelegateChanged(indexed address,indexed address,indexed address)
           handler: handleDelegateChanged
@@ -100,6 +100,6 @@ dataSources:
         - event: MinQuorumVotesBPSSet(uint16,uint16)
           handler: handleMinQuorumVotesBPSSet
         - event: MaxQuorumVotesBPSSet(uint16,uint16)
-          handler: handleMaxQuorumVotesBPSSet        
+          handler: handleMaxQuorumVotesBPSSet
         - event: QuorumCoefficientSet(uint32,uint32)
           handler: handleQuorumCoefficientSet
