@@ -1,6 +1,7 @@
 import { useAppSelector } from '../../hooks';
 import classes from './NavBar.module.css';
-import logo from '../../assets/logo.svg';
+// import logo from '../../assets/logo.svg';
+import logo from '../../assets/logo.png';
 import { useEtherBalance } from '@usedapp/core';
 import { useHistory } from 'react-router';
 import { Link } from 'react-router-dom';
@@ -95,7 +96,7 @@ const NavBar = () => {
                 buttonStyle={nonWalletButtonStyle}
               />
             </Nav.Link>
-            <Nav.Link
+            {/* <Nav.Link
               href={externalURL(ExternalURL.nounsCenter)}
               className={classes.nounsNavLink}
               target="_blank"
@@ -107,8 +108,8 @@ const NavBar = () => {
                 buttonIcon={<FontAwesomeIcon icon={faBookOpen} />}
                 buttonStyle={nonWalletButtonStyle}
               />
-            </Nav.Link>
-            <Nav.Link
+            </Nav.Link> */}
+            {/* <Nav.Link
               href={externalURL(ExternalURL.discourse)}
               className={classes.nounsNavLink}
               target="_blank"
@@ -120,7 +121,7 @@ const NavBar = () => {
                 buttonIcon={<FontAwesomeIcon icon={faComments} />}
                 buttonStyle={nonWalletButtonStyle}
               />
-            </Nav.Link>
+            </Nav.Link> */}
             <Nav.Link
               as={Link}
               to="/playground"
