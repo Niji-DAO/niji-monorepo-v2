@@ -13,7 +13,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
   },
-  "include": ["src/**/*", "src/contract/**/*.json",  "src/libs/**/*.json"],
+  "include": ["src/**/*", "src/contract/**/*.json",  "src/libs/**/*.json", "src/utils/**/*.json"],
   "references": [
     {
       "path": "../nouns-contracts/tsconfig.build.json"
