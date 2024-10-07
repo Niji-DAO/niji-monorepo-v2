@@ -26,7 +26,7 @@ task('niji-deploy-and-configure', 'Deploy and configure all contracts')
   .addOptionalParam('quorumVotesBps', 'Votes required for quorum (basis points)')
   .setAction(async (args, { run }) => {
     // Deploy the Nouns DAO contracts and return deployment information
-    const contracts = await run('deploy', args);
+    const contracts = await run('niji-deploy', args);
 
     // Verify the contracts on Etherscan
     await run('verify-etherscan', {

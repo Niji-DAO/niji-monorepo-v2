@@ -20,6 +20,7 @@
     "prepare:rinkeby": "mustache config/rinkeby.json subgraph.yaml.mustache > subgraph.yaml",
     "prepare:mainnet": "mustache config/mainnet.json subgraph.yaml.mustache > subgraph.yaml",
     "prepare:goerli": "mustache config/goerli.json subgraph.yaml.mustache > subgraph.yaml",
+    "prepare:base_sepolia": "mustache config/base_sepolia.json subgraph.yaml.mustache > subgraph.yaml",
     "codegen": "graph codegen --output-dir src/types/",
     "test:configgen": "echo libsFolder: $(dirname `cd ../..; pwd`)/nouns-monorepo/node_modules > matchstick.yaml",
     "test": "graph test",
@@ -28,8 +29,9 @@
     "deploy:localnode": "graph deploy --product='hosted-service' --node='http://localhost:8020/' --ipfs='http://localhost:5001/'",
     "deploy:hardhat": "yarn clean && yarn prepare:hardhat && yarn codegen && yarn create:localnode nounsdao/nouns-subgraph && yarn deploy:localnode nounsdao/nouns-subgraph",
     "deploy:rinkeby": "yarn clean && yarn prepare:rinkeby && yarn codegen && yarn deploy nounsdao/nouns-subgraph-rinkeby",
-    "deploy:mainnet": "yarn clean && yarn prepare:mainnet && yarn codegen && yarn deploy nijinouns/nijinouns-subgraph",
-    "deploy:goerli": "yarn clean && yarn prepare:goerli && yarn codegen && yarn deploy tnplimited/nijinouns-subgraph-goerli",
+    "deploy:mainnet": "yarn clean && yarn prepare:mainnet && yarn codegen && yarn deploy nounsdao/nounsdao-subgraph",
+    "deploy:goerli": "yarn clean && yarn prepare:goerli && yarn codegen && yarn deploy tnplimited/nounsdao-subgraph-goerli",
+    "deploy:base_sepolia": "yarn clean && yarn prepare:base_sepolia && yarn codegen && yarn deploy --studio niji-testnet",
     "mustache": "mustache"
   },
   "devDependencies": {

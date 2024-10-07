@@ -6,6 +6,8 @@ import type { ContractAddresses as NounsContractAddresses } from './contract';
 import { getContractAddressesForChainOrThrow } from './contract';
 import { ChainId } from '@usedapp/core';
 
+const baseSepoliaChainId = 84532;
+
 interface ExternalContractAddresses {
   lidoToken: string | undefined;
 }
@@ -19,7 +21,12 @@ interface AppConfig {
   enableHistory: boolean;
 }
 
-type SupportedChains = ChainId.Rinkeby | ChainId.Mainnet | ChainId.Hardhat | ChainId.Goerli;
+type SupportedChains =
+  | ChainId.Rinkeby
+  | ChainId.Mainnet
+  | ChainId.Hardhat
+  | ChainId.Goerli
+  | typeof baseSepoliaChainId;
 
 interface CacheBucket {
   name: string;
@@ -82,6 +89,12 @@ const app: Record<SupportedChains, AppConfig> = {
     subgraphApiUri: 'http://localhost:8000/subgraphs/name/nounsdao/nouns-subgraph',
     enableHistory: process.env.REACT_APP_ENABLE_HISTORY === 'true',
   },
+  [baseSepoliaChainId]: {
+    jsonRpcUri: createNetworkHttpUrl('base_sepolia'),
+    wsRpcUri: createNetworkWsUrl('base_sepolia'),
+    subgraphApiUri: 'https://api.studio.thegraph.com/query/91004/niji-testnet/version/latest',
+    enableHistory: process.env.REACT_APP_ENABLE_HISTORY === 'true',
+  },
 };
 
 const externalAddresses: Record<SupportedChains, ExternalContractAddresses> = {
@@ -95,6 +108,9 @@ const externalAddresses: Record<SupportedChains, ExternalContractAddresses> = {
     lidoToken: '0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84',
   },
   [ChainId.Hardhat]: {
+    lidoToken: undefined,
+  },
+  [baseSepoliaChainId]: {
     lidoToken: undefined,
   },
 };

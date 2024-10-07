@@ -1,0 +1,15 @@
+{
+  "network": "base-sepolia",
+  "nounsToken": {
+    "address": "0xd5A6699A63115a6a85A2596b03d14694ebE6ce69",
+    "startBlock": 16268567
+  },
+  "nounsAuctionHouse": {
+    "address": "0x77bf3cA91067F086379E5Cb3cce4fA0Aca8Bb8fa",
+    "startBlock": 16268575
+  },
+  "nounsDAO": {
+    "address": "0xD08faCeb444dbb6b063a51C2ddFb564Fa0f8Dce0",
+    "startBlock": 7734001
+  }
+}
