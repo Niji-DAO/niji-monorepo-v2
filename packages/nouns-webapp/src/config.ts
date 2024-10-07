@@ -6,7 +6,7 @@ import type { ContractAddresses as NounsContractAddresses } from './contract';
 import { getContractAddressesForChainOrThrow } from './contract';
 import { ChainId } from '@usedapp/core';
 
-const baseSepoliaChainId = 84532;
+export const baseSepoliaChainId = 84532;
 
 interface ExternalContractAddresses {
   lidoToken: string | undefined;

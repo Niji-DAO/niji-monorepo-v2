@@ -43,6 +43,7 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 import { nounPath } from './utils/history';
 import { push } from 'connected-react-router';
 import { LanguageProvider } from './i18n/LanguageProvider';
+import { baseSepoliaChainId } from './config';
 
 dotenv.config();
 
@@ -84,6 +85,7 @@ const supportedChainURLs = {
   [ChainId.Rinkeby]: createNetworkHttpUrl('rinkeby'),
   [ChainId.Hardhat]: 'http://localhost:8545',
   [ChainId.Goerli]: createNetworkHttpUrl('goerli'),
+  [baseSepoliaChainId]: createNetworkHttpUrl('base_sepolia'),
 };
 
 // prettier-ignore
