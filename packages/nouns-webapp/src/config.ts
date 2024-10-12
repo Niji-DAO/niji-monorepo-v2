@@ -20,12 +20,12 @@ interface AppConfig {
   enableHistory: boolean;
 }
 
-type SupportedChains =
-  | ChainId.Rinkeby
-  | ChainId.Mainnet
-  | ChainId.Hardhat
-  | ChainId.Goerli
-  | typeof BaseSepoliaChain;
+// type SupportedChains =
+//   | ChainId.Rinkeby
+//   | ChainId.Mainnet
+//   | ChainId.Hardhat
+//   | ChainId.Goerli
+//   | typeof BaseSepoliaChain;
 
 interface CacheBucket {
   name: string;
