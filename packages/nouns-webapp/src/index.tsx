@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { ChainId, DAppProvider } from '@usedapp/core';
+import { ChainId, DAppProvider, DEFAULT_SUPPORTED_CHAINS } from '@usedapp/core';
 import { Web3ReactProvider } from '@web3-react/core';
 import { Web3Provider } from '@ethersproject/providers';
 import account from './state/slices/account';
@@ -43,7 +43,7 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 import { nounPath } from './utils/history';
 import { push } from 'connected-react-router';
 import { LanguageProvider } from './i18n/LanguageProvider';
-import { baseSepoliaChainId } from './config';
+import { BaseSepoliaChain } from './chain';
 
 dotenv.config();
 
@@ -85,8 +85,10 @@ const supportedChainURLs = {
   [ChainId.Rinkeby]: createNetworkHttpUrl('rinkeby'),
   [ChainId.Hardhat]: 'http://localhost:8545',
   [ChainId.Goerli]: createNetworkHttpUrl('goerli'),
-  [baseSepoliaChainId]: createNetworkHttpUrl('base_sepolia'),
+  [BaseSepoliaChain.chainId]: createNetworkHttpUrl('base-sepolia'),
 };
+
+console.log(`supportedChainURLs[CHAIN_ID]: ${supportedChainURLs[CHAIN_ID]}`);
 
 // prettier-ignore
 const useDappConfig = {
@@ -96,7 +98,8 @@ const useDappConfig = {
   },
   multicallAddresses: {
     [ChainId.Hardhat]: multicallOnLocalhost,
-  }
+  },
+  networks: [...DEFAULT_SUPPORTED_CHAINS, BaseSepoliaChain],
 };
 
 const client = clientFactory(config.app.subgraphApiUri);

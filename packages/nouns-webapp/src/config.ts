@@ -5,8 +5,7 @@
 import type { ContractAddresses as NounsContractAddresses } from './contract';
 import { getContractAddressesForChainOrThrow } from './contract';
 import { ChainId } from '@usedapp/core';
-
-export const baseSepoliaChainId = 84532;
+import { BaseSepoliaChain } from './chain';
 
 interface ExternalContractAddresses {
   lidoToken: string | undefined;
@@ -26,7 +25,7 @@ type SupportedChains =
   | ChainId.Mainnet
   | ChainId.Hardhat
   | ChainId.Goerli
-  | typeof baseSepoliaChainId;
+  | typeof BaseSepoliaChain;
 
 interface CacheBucket {
   name: string;
@@ -48,11 +47,13 @@ export const cacheKey = (bucket: CacheBucket, ...parts: (string | number)[]) => 
   return [bucket.name, bucket.version, ...parts].join('-').toLowerCase();
 };
 
-export const CHAIN_ID: SupportedChains = parseInt(process.env.REACT_APP_CHAIN_ID ?? '4');
+export const CHAIN_ID: number = parseInt(process.env.REACT_APP_CHAIN_ID ?? '4');
+console.log('CHAIN_ID', CHAIN_ID);
 
 export const ETHERSCAN_API_KEY = process.env.REACT_APP_ETHERSCAN_API_KEY ?? '';
 
 const INFURA_PROJECT_ID = process.env.REACT_APP_INFURA_PROJECT_ID;
+console.log('INFURA_PROJECT_ID', INFURA_PROJECT_ID);
 
 export const createNetworkHttpUrl = (network: string): string => {
   const custom = process.env[`REACT_APP_${network.toUpperCase()}_JSONRPC`];
@@ -64,7 +65,7 @@ export const createNetworkWsUrl = (network: string): string => {
   return custom || `wss://${network}.infura.io/ws/v3/${INFURA_PROJECT_ID}`;
 };
 
-const app: Record<SupportedChains, AppConfig> = {
+const app: Record<number, AppConfig> = {
   [ChainId.Rinkeby]: {
     jsonRpcUri: createNetworkHttpUrl('rinkeby'),
     wsRpcUri: createNetworkWsUrl('rinkeby'),
@@ -89,15 +90,23 @@ const app: Record<SupportedChains, AppConfig> = {
     subgraphApiUri: 'http://localhost:8000/subgraphs/name/nounsdao/nouns-subgraph',
     enableHistory: process.env.REACT_APP_ENABLE_HISTORY === 'true',
   },
-  [baseSepoliaChainId]: {
-    jsonRpcUri: createNetworkHttpUrl('base_sepolia'),
-    wsRpcUri: createNetworkWsUrl('base_sepolia'),
+  [ChainId.Sepolia]: {
+    jsonRpcUri: createNetworkHttpUrl('sepolia'),
+    wsRpcUri: createNetworkWsUrl('sepolia'),
+    subgraphApiUri: 'https://api.studio.thegraph.com/query/91004/niji-testnet/version/latest',
+    enableHistory: process.env.REACT_APP_ENABLE_HISTORY === 'true',
+  },
+  [BaseSepoliaChain.chainId]: {
+    jsonRpcUri: createNetworkHttpUrl('base-sepolia'),
+    wsRpcUri: createNetworkWsUrl('base-sepolia'),
     subgraphApiUri: 'https://api.studio.thegraph.com/query/91004/niji-testnet/version/latest',
     enableHistory: process.env.REACT_APP_ENABLE_HISTORY === 'true',
   },
 };
 
-const externalAddresses: Record<SupportedChains, ExternalContractAddresses> = {
+console.log(`app: ${JSON.stringify(app)}`);
+
+const externalAddresses: Record<number, ExternalContractAddresses> = {
   [ChainId.Rinkeby]: {
     lidoToken: '0xF4242f9d78DB7218Ad72Ee3aE14469DBDE8731eD',
   },
@@ -110,7 +119,7 @@ const externalAddresses: Record<SupportedChains, ExternalContractAddresses> = {
   [ChainId.Hardhat]: {
     lidoToken: undefined,
   },
-  [baseSepoliaChainId]: {
+  [BaseSepoliaChain.chainId]: {
     lidoToken: undefined,
   },
 };

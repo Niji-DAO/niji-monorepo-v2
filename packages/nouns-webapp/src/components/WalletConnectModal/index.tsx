@@ -12,6 +12,7 @@ import config, { CHAIN_ID } from '../../config';
 import classes from './WalletConnectModal.module.css';
 import { Trans } from '@lingui/macro';
 
+
 const WalletConnectModal: React.FC<{ onDismiss: () => void }> = props => {
   const { onDismiss } = props;
   const { activate } = useEthers();
