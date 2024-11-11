@@ -119,6 +119,9 @@ const externalAddresses: Record<number, ExternalContractAddresses> = {
   [ChainId.Hardhat]: {
     lidoToken: undefined,
   },
+  [ChainId.Sepolia]: {
+    lidoToken: undefined,
+  },
   [BaseSepoliaChain.chainId]: {
     lidoToken: undefined,
   },

@@ -31,7 +31,7 @@
     "deploy:rinkeby": "yarn clean && yarn prepare:rinkeby && yarn codegen && yarn deploy nounsdao/nouns-subgraph-rinkeby",
     "deploy:mainnet": "yarn clean && yarn prepare:mainnet && yarn codegen && yarn deploy nounsdao/nounsdao-subgraph",
     "deploy:goerli": "yarn clean && yarn prepare:goerli && yarn codegen && yarn deploy tnplimited/nounsdao-subgraph-goerli",
-    "deploy:base_sepolia": "yarn clean && yarn prepare:base_sepolia && yarn codegen && yarn deploy --studio niji-testnet",
+    "deploy:base_sepolia": "yarn clean && yarn prepare:base_sepolia && yarn codegen && graph deploy --studio niji-testnet",
     "mustache": "mustache"
   },
   "devDependencies": {

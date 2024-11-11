@@ -129,8 +129,13 @@ export const useNounSeed = (nounId: EthersBN) => {
     method: 'seeds',
     args: [nounId],
   };
+  if (request) {
+    console.log(`useNounSeed request.address: ${request.address}`);
+    console.log(`useNounSeed request.method: ${request.method}`);
+    console.log(`useNounSeed request.args: ${request.args}`);
+  }
   const response = useContractCall<INounSeed>(request);
-  console.log(`useNounSeedresponse: ${response}`);
+  console.log(`useNounSeed response: ${response}`);
   if (response) {
     const seedCache = localStorage.getItem(seedCacheKey);
     console.log(`useNounSeed seedCache: ${seedCache}`);

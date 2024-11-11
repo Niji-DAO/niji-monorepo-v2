@@ -18,6 +18,7 @@ const wethContracts: Record<number, string> = {
   [ChainId.Rinkeby]: '0xc778417e063141139fce010982780140aa0cd5ab',
   [ChainId.Kovan]: '0xd0a1e359811322d97991e03f863a0c30c2cf029c',
   [ChainId.Goerli]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
+  [ChainId.Sepolia]: '0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9',
   [ChainId.BaseSepolia]: '0xee5678b3070f0eb0e9c7968319139f4552e4de20',
 };
 
@@ -207,6 +208,7 @@ task('niji-deploy', 'Deploys NFTDescriptor, NounsDescriptor, NounsSeeder, and No
     };
 
     for (const [name, contract] of Object.entries(contracts)) {
+      console.log(`Deploying ${name} args: ${JSON.stringify(contract.args)}`);
       let gasPrice = await ethers.provider.getGasPrice();
       if (!args.autoDeploy) {
         const gasInGwei = Math.round(Number(ethers.utils.formatUnits(gasPrice, 'gwei')));

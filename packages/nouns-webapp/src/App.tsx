@@ -30,15 +30,12 @@ function App() {
   dayjs.extend(relativeTime);
 
   useEffect(() => {
-    // console.log('chainId', chainId);
-    // console.log('CHAIN_ID', CHAIN_ID);
-    // console.log(`Number(CHAIN_ID) !== chainId: ${Number(CHAIN_ID) !== Number(chainId)}`);
-    // console.log(`account: ${account}`);
     // Local account array updated
     dispatch(setActiveAccount(account));
   }, [account, dispatch]);
 
   const alertModal = useAppSelector(state => state.application.alertModal);
+  console.log(`chainId: ${chainId}, CHAIN_ID: ${CHAIN_ID}`);
 
   return (
     <div className={`${classes.wrapper}`}>

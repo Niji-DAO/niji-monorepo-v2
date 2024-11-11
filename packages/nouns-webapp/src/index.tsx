@@ -29,7 +29,7 @@ import pastAuctions, { addPastAuctions } from './state/slices/pastAuctions';
 import LogsUpdater from './state/updaters/logs';
 import config, { CHAIN_ID, createNetworkHttpUrl, multicallOnLocalhost } from './config';
 import { WebSocketProvider } from '@ethersproject/providers';
-import { BigNumber, BigNumberish } from 'ethers';
+import { BigNumber, BigNumberish, getDefaultProvider } from 'ethers';
 import { NounsAuctionHouseFactory } from '@nouns/sdk';
 import dotenv from 'dotenv';
 import { useAppDispatch, useAppSelector } from './hooks';
@@ -44,6 +44,7 @@ import { nounPath } from './utils/history';
 import { push } from 'connected-react-router';
 import { LanguageProvider } from './i18n/LanguageProvider';
 import { BaseSepoliaChain } from './chain';
+
 
 dotenv.config();
 
@@ -85,10 +86,13 @@ const supportedChainURLs = {
   [ChainId.Rinkeby]: createNetworkHttpUrl('rinkeby'),
   [ChainId.Hardhat]: 'http://localhost:8545',
   [ChainId.Goerli]: createNetworkHttpUrl('goerli'),
+  [ChainId.Sepolia]: createNetworkHttpUrl('sepolia'),
   [BaseSepoliaChain.chainId]: createNetworkHttpUrl('base-sepolia'),
 };
 
 console.log(`supportedChainURLs[CHAIN_ID]: ${supportedChainURLs[CHAIN_ID]}`);
+
+console.log(`CHAIN_ID: ${CHAIN_ID}`);
 
 // prettier-ignore
 const useDappConfig = {
@@ -101,6 +105,7 @@ const useDappConfig = {
   },
   networks: [...DEFAULT_SUPPORTED_CHAINS, BaseSepoliaChain],
 };
+
 
 const client = clientFactory(config.app.subgraphApiUri);
 
@@ -202,6 +207,7 @@ const PastAuctions: React.FC = () => {
 
   return <></>;
 };
+console.log(`config.app.jsonRpcUri: ${config.app.jsonRpcUri}`);
 
 ReactDOM.render(
   <Provider store={store}>
@@ -211,6 +217,7 @@ ReactDOM.render(
         <Web3ReactProvider
           getLibrary={
             provider => new Web3Provider(provider) // this will vary according to whether you use e.g. ethers or web3.js
+            // provider => new InfuraProvider(CHAIN_ID, config.app.jsonRpcUri)
           }
         >
           <ApolloProvider client={client}>

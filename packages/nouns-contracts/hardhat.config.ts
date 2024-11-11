@@ -2,13 +2,15 @@
 import { HardhatUserConfig } from 'hardhat/config';
 import dotenv from 'dotenv';
 import '@nomiclabs/hardhat-waffle';
-import '@nomiclabs/hardhat-etherscan';
+// import '@nomiclabs/hardhat-etherscan';
 import 'solidity-coverage';
 import '@typechain/hardhat';
 import 'hardhat-abi-exporter';
 import '@openzeppelin/hardhat-upgrades';
 import 'hardhat-gas-reporter';
 import './tasks';
+import '@nomicfoundation/hardhat-verify';
+
 
 dotenv.config();
 
@@ -40,8 +42,15 @@ const config: HardhatUserConfig = {
         ? { mnemonic: process.env.MNEMONIC }
         : [process.env.WALLET_PRIVATE_KEY!].filter(Boolean),
     },
+    sepolia: {
+      url: `https://sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
+      accounts: process.env.MNEMONIC
+        ? { mnemonic: process.env.MNEMONIC }
+        : [process.env.WALLET_PRIVATE_KEY!].filter(Boolean),
+    },
     base_sepolia: {
       url: 'https://sepolia.base.org',
+      chainId: 84532,
       accounts: process.env.MNEMONIC
         ? { mnemonic: process.env.MNEMONIC }
         : [process.env.WALLET_PRIVATE_KEY!].filter(Boolean),
@@ -51,8 +60,27 @@ const config: HardhatUserConfig = {
     },
   },
   etherscan: {
-    // apiKey: process.env.ETHERSCAN_API_KEY,
-    apiKey: process.env.BASESCAN_API_KEY
+    apiKey: {
+      base_sepolia: process.env.BASE_ETHERSCAN_API_KEY!,
+    },
+    customChains: [
+      {
+        network: 'base',
+        chainId: 8453,
+        urls: {
+          apiURL: 'https://api.basescan.org/api',
+          browserURL: 'https://basescan.org',
+        },
+      },
+      {
+        network: 'base_sepolia',
+        chainId: 84532,
+        urls: {
+          apiURL: 'https://api-sepolia.basescan.org/api',
+          browserURL: 'https://sepolia.basescan.org',
+        },
+      },
+    ],
   },
   abiExporter: {
     path: './abi',
@@ -70,6 +98,9 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 60_000,
+  },
+  sourcify: {
+    enabled: true,
   },
 };
 export default config;

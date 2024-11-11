@@ -47,16 +47,28 @@
     "nounsDAOProxy": "0x0dcd1bf9a1b36ce34237eeafef220932846bcd82",
     "nounsDAOLogicV1": "0xa51c1fc2f0d1a1b8494ed1fe312d7c3a78ed91c0"
   },
+  "11155111": {
+    "nounsToken": "0x8208Ced2932973f71EFF272E7f02Ddd4582e6096",
+    "nounsSeeder": "0x44D6c1762A5e1949B3EF22F1bb7Ea4bb7E3a70a3",
+    "nounsDescriptor": "0x4Cd138e66320A2Ac54815d9ef953DFc193a2fC57",
+    "nftDescriptor": "0x195A1d31FB95D5803472A38D84B8F5912815807a",
+    "nounsAuctionHouse": "0xB88B488f49D2d60e860Ae86da26ae45cFa0b4891",
+    "nounsAuctionHouseProxy": "0x99956D5a7a46dAD1429aE28f7f44bd28e0BB7811",
+    "nounsAuctionHouseProxyAdmin": "0x438AFb3A6a018242577C1342FdbE0806CBcf6dbe",
+    "nounsDaoExecutor": "0xf2e912325969DBe2F4588dAeF898eE2a49d2135b",
+    "nounsDAOProxy": "0x4eCe4462d1eFb8d62089504A1788F85bB2c7209C",
+    "nounsDAOLogicV1": "0x4fdC0Ad079ea27e389d3B891B0dA9287b8b88b8b"
+  },
   "84532": {
-    "nounsToken": "0xd5A6699A63115a6a85A2596b03d14694ebE6ce69",
-    "nounsSeeder": "0x8363098F6a8c3b2dCE2cd24CA559B44d77bfe1d9",
-    "nounsDescriptor": "0x2c851854f377e06d6CA31891aC8D99414f71eEd6",
-    "nftDescriptor": "0x053572eFFE0dBB56172246CC66e23c5Eab9dC823",
-    "nounsAuctionHouse": "0x1625e7571BE2c562d22567d83D7F57A10458c839",
-    "nounsAuctionHouseProxy": "0x77bf3cA91067F086379E5Cb3cce4fA0Aca8Bb8fa",
-    "nounsAuctionHouseProxyAdmin": "0xcf9bC8608aCf39Ac1a51c05751b93EF9bbA75a71",
-    "nounsDaoExecutor": "0x26f10ea0564693fc1Cf37B85DfF1753f9d999f05",
-    "nounsDAOProxy": "0x0648f94A79a36c78F89CFA1798593Ec5b7f65A1a",
-    "nounsDAOLogicV1": "0x31298ddd2415DF7b717e41962cD9439cDd11cE87"
+    "nounsToken": "0x9409204dCD6ae58733De190fD1B1Cc80432fBA8e",
+    "nounsSeeder": "0xf63c0662f47C216504B88211370ED3F55955B839",
+    "nounsDescriptor": "0x95308371d230D71DCF70b66a2811947e9667f733",
+    "nftDescriptor": "0x91b22Feb2eC0e44063c2Fa66F12388159160cb2c",
+    "nounsAuctionHouse": "0xB5c6BC9747aD2165533bb95cE6468bA5C083B1f6",
+    "nounsAuctionHouseProxy": "0xF5ff6cdaFa8dEC31360EFE6845042122f6398019",
+    "nounsAuctionHouseProxyAdmin": "0xB5c6BC9747aD2165533bb95cE6468bA5C083B1f6",
+    "nounsDaoExecutor": "0x9ee5bA565DebA82Ec0e0a75AF4b0c7dD176159E3",
+    "nounsDAOProxy": "0x63A4D9A19CAa46D6462b595c1C917637D4Ba8bB8",
+    "nounsDAOLogicV1": "0xfA44EA14148574924a7D2F7d0EE2B76C6766F931"
   }
 }
