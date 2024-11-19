@@ -48,12 +48,10 @@ export const cacheKey = (bucket: CacheBucket, ...parts: (string | number)[]) => 
 };
 
 export const CHAIN_ID: number = parseInt(process.env.REACT_APP_CHAIN_ID ?? '4');
-console.log('CHAIN_ID', CHAIN_ID);
 
 export const ETHERSCAN_API_KEY = process.env.REACT_APP_ETHERSCAN_API_KEY ?? '';
 
 const INFURA_PROJECT_ID = process.env.REACT_APP_INFURA_PROJECT_ID;
-console.log('INFURA_PROJECT_ID', INFURA_PROJECT_ID);
 
 export const createNetworkHttpUrl = (network: string): string => {
   const custom = process.env[`REACT_APP_${network.toUpperCase()}_JSONRPC`];
@@ -90,12 +88,6 @@ const app: Record<number, AppConfig> = {
     subgraphApiUri: 'http://localhost:8000/subgraphs/name/nounsdao/nouns-subgraph',
     enableHistory: process.env.REACT_APP_ENABLE_HISTORY === 'true',
   },
-  [ChainId.Sepolia]: {
-    jsonRpcUri: createNetworkHttpUrl('sepolia'),
-    wsRpcUri: createNetworkWsUrl('sepolia'),
-    subgraphApiUri: 'https://api.studio.thegraph.com/query/91004/niji-testnet/version/latest',
-    enableHistory: process.env.REACT_APP_ENABLE_HISTORY === 'true',
-  },
   [BaseSepoliaChain.chainId]: {
     jsonRpcUri: createNetworkHttpUrl('base-sepolia'),
     wsRpcUri: createNetworkWsUrl('base-sepolia'),
@@ -103,8 +95,6 @@ const app: Record<number, AppConfig> = {
     enableHistory: process.env.REACT_APP_ENABLE_HISTORY === 'true',
   },
 };
-
-console.log(`app: ${JSON.stringify(app)}`);
 
 const externalAddresses: Record<number, ExternalContractAddresses> = {
   [ChainId.Rinkeby]: {

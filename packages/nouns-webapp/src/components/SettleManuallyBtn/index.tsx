@@ -25,7 +25,7 @@ const SettleManuallyBtn: React.FC<{
   // timer logic
   useEffect(() => {
     // Allow immediate manual settlement when testing
-    if (CHAIN_ID !== 1) {
+    if (CHAIN_ID !== 8453) {
       setSettleEnabled(true);
       setAuctionTimer(0);
       return;
