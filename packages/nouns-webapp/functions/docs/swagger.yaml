@@ -169,27 +169,15 @@ components:
       type: object
       description: The attributes that make up a Noun's seed
       properties:
-        backDecoration:
+        head:
           type: integer
-        backgroundDecoration:
+        body:
           type: integer
-        special:
+        background:
           type: integer
-        leftHand:
+        glasses:
           type: integer
-        back:
-          type: integer
-        clothe:
-          type: integer
-        choker:
-          type: integer
-        ear:
-          type: integer
-        hair:
-          type: integer
-        headphones:
-          type: integer
-        hat:
+        skill:
           type: integer
     NormalizedNoun:
       type: object

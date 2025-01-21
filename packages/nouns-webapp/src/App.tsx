@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ChainId, useEthers } from '@usedapp/core';
 import { useAppDispatch, useAppSelector } from './hooks';
 import { setActiveAccount } from './state/slices/account';
@@ -15,7 +15,6 @@ import AuctionPage from './pages/Auction';
 import GovernancePage from './pages/Governance';
 import CreateProposalPage from './pages/CreateProposal';
 import VotePage from './pages/Vote';
-import NoundersPage from './pages/Nounders';
 import NotFoundPage from './pages/NotFound';
 import Playground from './pages/Playground';
 import { CHAIN_ID } from './config';
@@ -25,7 +24,8 @@ import dayjs from 'dayjs';
 import DelegatePage from './pages/DelegatePage';
 
 function App() {
-  const { account, chainId, library } = useEthers();
+  const { account, chainId, library, isLoading } = useEthers();
+  const [cachedChainId, setCachedChainId] = useState(chainId);
   const dispatch = useAppDispatch();
   dayjs.extend(relativeTime);
 
@@ -34,12 +34,17 @@ function App() {
     dispatch(setActiveAccount(account));
   }, [account, dispatch]);
 
+  useEffect(() => {
+    if (!isLoading) {
+      setCachedChainId(chainId);
+    }
+  }, [chainId, isLoading]);
+
   const alertModal = useAppSelector(state => state.application.alertModal);
-  console.log(`chainId: ${chainId}, CHAIN_ID: ${CHAIN_ID}`);
 
   return (
     <div className={`${classes.wrapper}`}>
-      {Number(CHAIN_ID) !== chainId && <NetworkAlert />}
+      {Number(CHAIN_ID) !== cachedChainId && <NetworkAlert />}
       {alertModal.show && (
         <AlertModal
           title={alertModal.title}
@@ -61,7 +66,6 @@ function App() {
               path="/noun/:id"
               render={props => <AuctionPage initialAuctionId={Number(props.match.params.id)} />}
             />
-            <Route exact path="/nounders" component={NoundersPage} />
             <Route exact path="/create-proposal" component={CreateProposalPage} />
             <Route exact path="/vote" component={GovernancePage} />
             <Route exact path="/vote/:id" component={VotePage} />

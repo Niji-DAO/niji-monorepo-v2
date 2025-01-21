@@ -1,8 +1,6 @@
 import { useContractCall, useContractFunction, useEthers } from '@usedapp/core';
 import { BigNumber as EthersBN, ethers, utils } from 'ethers';
-// import { NounsTokenABI, NounsTokenFactory } from '@nouns/contracts';
-import { NounsTokenABI } from '../contract';
-import { NounsTokenFactory } from '../contract/abi';
+import { NounsTokenABI, NounsTokenFactory } from '@nouns/contracts';
 import config, { cache, cacheKey, CHAIN_ID } from '../config';
 import { useQuery } from '@apollo/client';
 import { seedsQuery } from './subgraph';
@@ -97,17 +95,12 @@ const seedArrayToObject = (seeds: (INounSeed & { id: string })[]) => {
 
 const useNounSeeds = () => {
   const cache = localStorage.getItem(seedCacheKey);
-  console.log(`useNounSeeds cache: ${cache}`);
   const cachedSeeds = cache ? JSON.parse(cache) : undefined;
-  console.log(`useNounSeeds cachedSeeds: ${JSON.stringify(cachedSeeds)}`);
   const { data } = useQuery(seedsQuery(), {
     skip: !!cachedSeeds,
   });
-  console.log(`useNounSeeds data: ${JSON.stringify(data)}`);
 
   useEffect(() => {
-    console.log(`useNounSeeds useEffect data: ${JSON.stringify(data)}`);
-    console.log(`useNounSeeds data?.seeds?.length: ${data?.seeds?.length}`);
     if (!cachedSeeds && data?.seeds?.length) {
       localStorage.setItem(seedCacheKey, JSON.stringify(seedArrayToObject(data.seeds)));
     }
@@ -116,12 +109,9 @@ const useNounSeeds = () => {
   return cachedSeeds;
 };
 
-export const useNounSeed = (nounId: EthersBN) => {
-  console.log(`useNounSeed nounId: ${nounId}`);
+export const useNounSeed = (nounId: EthersBN): INounSeed => {
   const seeds = useNounSeeds();
-  console.log(`useNounSeed seeds: ${seeds}`);
   const seed = seeds?.[nounId.toString()];
-  console.log(`useNounSeed seed: ${seed}`);
   // prettier-ignore
   const request = seed ? false : {
     abi,
@@ -129,16 +119,9 @@ export const useNounSeed = (nounId: EthersBN) => {
     method: 'seeds',
     args: [nounId],
   };
-  if (request) {
-    console.log(`useNounSeed request.address: ${request.address}`);
-    console.log(`useNounSeed request.method: ${request.method}`);
-    console.log(`useNounSeed request.args: ${request.args}`);
-  }
   const response = useContractCall<INounSeed>(request);
-  console.log(`useNounSeed response: ${response}`);
   if (response) {
     const seedCache = localStorage.getItem(seedCacheKey);
-    console.log(`useNounSeed seedCache: ${seedCache}`);
     if (seedCache && isSeedValid(response)) {
       const updatedSeedCache = JSON.stringify({
         ...JSON.parse(seedCache),
@@ -157,10 +140,8 @@ export const useNounSeed = (nounId: EthersBN) => {
           hat: response.hat,
         },
       });
-      console.log(`useNounSeed updatedSeedCache: ${updatedSeedCache}`);
       localStorage.setItem(seedCacheKey, updatedSeedCache);
     }
-
     return response;
   }
   return seed;
@@ -210,7 +191,7 @@ export const useUserVotesAsOfBlock = (block: number | undefined): number | undef
 export const useDelegateVotes = () => {
   const nounsToken = new NounsTokenFactory().attach(config.addresses.nounsToken);
 
-  const { send, state } = useContractFunction(nounsToken, 'delegate');
+  const { send, state } = useContractFunction(nounsToken as any, 'delegate');
 
   return { send, state };
 };
@@ -237,4 +218,15 @@ export const useUserNounTokenBalance = (): number | undefined => {
       args: [account],
     }) || [];
   return tokenBalance?.toNumber();
+};
+
+export const useNoundersDAO = (): string | undefined => {
+  const [noundersDAO] =
+    useContractCall<[EthersBN]>({
+      abi,
+      address: config.addresses.nounsToken,
+      method: 'noundersDAO',
+      args: [],
+    }) || [];
+  return noundersDAO?.toString();
 };

@@ -36,7 +36,14 @@ yarn --silent mustache config/[network]-fork.json subgraph.yaml.mustache > subgr
 yarn codegen
 ```
 
+### Subgraph Auth
+
+```sh
+$ graph auth --studio <DEPLOY_KEY>
+```
+
 ### Compile and deploy to thegraph (must be authenticated)
+
 
 ```sh
 # Official Subgraph
@@ -44,6 +51,10 @@ yarn deploy:[network] # Supports rinkeby and mainnet
 
 # Fork
 yarn deploy [organization]/[subgraph-name]
+```
+
+```sh
+graph deploy --studio niji-testnet
 ```
 
 ## Running a local deployment

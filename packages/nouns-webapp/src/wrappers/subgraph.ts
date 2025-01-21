@@ -46,24 +46,17 @@ export const seedsQuery = (first = 1_000) => gql`
   seeds(first: ${first}) {
     id
     background
-    backDecoration
-    backgroundDecoration
-    special
-    leftHand
-    back
-    clothe
-    choker
-    ear
-    hair
-    hat
-    headphone
+    body
+    head
+    glasses
+    skill
   }
 }
 `;
 
-export const proposalsQuery = (first = 1_000) => gql`
+export const proposalQuery = (id: string | number) => gql`
 {
-  proposals(first: ${first}, orderBy: createdBlock, orderDirection: asc) {
+  proposal(id: ${id}) {
     id
     description
     status
@@ -88,6 +81,23 @@ export const proposalsQuery = (first = 1_000) => gql`
 }
 `;
 
+export const partialProposalsQuery = (first = 1_000) => gql`
+{
+  proposals(first: ${first}, orderBy: createdBlock, orderDirection: asc) {
+    id
+    title
+    status
+    forVotes
+    againstVotes
+    abstainVotes
+    quorumVotes
+    executionETA
+    startBlock
+    endBlock
+  }
+}
+`;
+
 export const auctionQuery = (auctionId: number) => gql`
 {
 	auction(id: ${auctionId}) {
@@ -103,17 +113,11 @@ export const auctionQuery = (auctionId: number) => gql`
 		id
 		seed {
 		  id
-		  backDecoration
-    backgroundDecoration
-    special
-    leftHand
-    back
-    clothe
-    choker
-    ear
-    hair
-    headphones
-    hat
+		  background
+		  body
+		  head
+		  glasses
+		  skill
 		}
 		owner {
 		  id
@@ -153,17 +157,10 @@ export const nounQuery = (id: string) => gql`
 	  id
 	  seed {
 	  background
-		backDecoration
-    backgroundDecoration
-    special
-    leftHand
-    back
-    clothe
-    choker
-    ear
-    hair
-    headphones
-    hat
+		body
+		head
+		glasses
+		skill
 	}
 	  owner {
 		id
@@ -236,14 +233,14 @@ export const latestBidsQuery = (first: number = 10) => gql`
 		settled
 	  }
 	}
-  }
+  }  
 `;
 
-export const nounVotingHistoryQuery = (nounId: number) => gql`
+export const nounVotingHistoryQuery = (nounId: number, first = 1_000) => gql`
 {
 	noun(id: ${nounId}) {
 		id
-		votes {
+		votes(first: ${first}) {
       blockNumber
       proposal {
         id
@@ -258,9 +255,9 @@ export const nounVotingHistoryQuery = (nounId: number) => gql`
 }
 `;
 
-export const nounTransferHistoryQuery = (nounId: number) => gql`
+export const nounTransferHistoryQuery = (nounId: number, first = 1_000) => gql`
 {
-  transferEvents(where: {noun: "${nounId}"}) {
+  transferEvents(where: {noun: "${nounId}"}, first: ${first}) {
     id
     previousHolder {
       id
@@ -273,9 +270,9 @@ export const nounTransferHistoryQuery = (nounId: number) => gql`
 }
 `;
 
-export const nounDelegationHistoryQuery = (nounId: number) => gql`
+export const nounDelegationHistoryQuery = (nounId: number, first = 1_000) => gql`
 {
-  delegationEvents(where: {noun: "${nounId}"}) {
+  delegationEvents(where: {noun: "${nounId}"}, first: ${first}) {
     id
     previousDelegate {
       id
@@ -305,7 +302,7 @@ export const proposalVotesQuery = (proposalId: string) => gql`
         id
       }
 
-    }
+    }	
   }
 `;
 
@@ -342,7 +339,7 @@ export const totalNounSupplyAtPropSnapshot = (proposalId: string) => gql`
 export const propUsingDynamicQuorum = (propoaslId: string) => gql`
 {
   proposal(id: "${propoaslId}") {
-    quorumCoefficient
+    quorumCoefficient 
   }
 }
 `;

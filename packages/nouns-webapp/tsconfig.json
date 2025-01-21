@@ -1,19 +1,19 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2020",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
-    "composite": true,
-    // "declaration": false,
+    "composite": false,
+    "declaration": false,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "esnext",
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx",
+    "jsx": "react-jsx"
   },
-  "include": ["src/**/*", "src/contract/**/*.json",  "src/libs/**/*.json", "src/utils/**/*.json"],
+  "include": ["src"],
   "references": [
     {
       "path": "../nouns-contracts/tsconfig.build.json"

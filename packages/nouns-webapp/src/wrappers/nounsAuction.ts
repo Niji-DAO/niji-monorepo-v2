@@ -1,11 +1,12 @@
-import { useContractCall } from '@usedapp/core';
-import { BigNumber as EthersBN, utils } from 'ethers';
-import { NounsAuctionHouseABI } from '@nouns/sdk';
-import config from '../config';
+import { useContractCall, useContractFunction, useEthers } from '@usedapp/core';
+import { connectContractToSigner } from '@usedapp/core/dist/cjs/src/hooks';
 import BigNumber from 'bignumber.js';
-import { isNounderNoun } from '../utils/nounderNoun';
+import { BigNumber as EthersBN, utils } from 'ethers';
+import { NounsAuctionHouseABI, NounsAuctionHouseFactory } from '@nouns/sdk';
+import config from '../config';
 import { useAppSelector } from '../hooks';
 import { AuctionState } from '../state/slices/auction';
+import { isNounderNoun } from '../utils/nounderNoun';
 
 export enum AuctionHouseContractFunction {
   auction = 'auction',
@@ -26,6 +27,9 @@ export interface Auction {
 }
 
 const abi = new utils.Interface(NounsAuctionHouseABI);
+const nounsAuctionHouseContract = new NounsAuctionHouseFactory().attach(
+  config.addresses.nounsAuctionHouseProxy,
+);
 
 export const useAuction = (auctionHouseProxyAddress: string) => {
   const auction = useContractCall<Auction>({
@@ -38,9 +42,6 @@ export const useAuction = (auctionHouseProxyAddress: string) => {
 };
 
 export const useAuctionMinBidIncPercentage = () => {
-  console.log(
-    `config.addresses.nounsAuctionHouseProxy: ${config.addresses.nounsAuctionHouseProxy}`,
-  );
   const minBidIncrement = useContractCall({
     abi,
     address: config.addresses.nounsAuctionHouseProxy,
@@ -78,4 +79,27 @@ export const useNounCanVoteTimestamp = (nounId: number) => {
   }
 
   return EthersBN.from(maybeNounCanVoteTimestamp);
+};
+
+export const useSettleCurrentAndCreateNewAuction = () => {
+  const { library } = useEthers();
+  const { send: settleAuction, state: settleAuctionState } = useContractFunction(
+    nounsAuctionHouseContract as any,
+    AuctionHouseContractFunction.settleCurrentAndCreateNewAuction,
+  );
+
+  return {
+    send: async (...args: any[]): Promise<void> => {
+      const contract = connectContractToSigner(
+        nounsAuctionHouseContract as any,
+        undefined,
+        library && 'getSigner' in library ? library.getSigner() : undefined,
+      );
+      const gasLimit = await contract.estimateGas.settleCurrentAndCreateNewAuction(...args);
+      await settleAuction(...args, {
+        gasLimit: gasLimit.add(45_000), // A 45,000 gas pad is used to avoid 'Out of gas' errors
+      });
+    },
+    state: settleAuctionState,
+  };
 };

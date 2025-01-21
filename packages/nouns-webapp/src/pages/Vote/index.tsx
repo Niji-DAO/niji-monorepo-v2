@@ -2,6 +2,7 @@ import { Row, Col, Button, Card, Spinner } from 'react-bootstrap';
 import Section from '../../layout/Section';
 import {
   ProposalState,
+  useCancelProposal,
   useCurrentQuorum,
   useExecuteProposal,
   useProposal,
@@ -10,7 +11,7 @@ import {
 import { useUserVotesAsOfBlock } from '../../wrappers/nounToken';
 import classes from './Vote.module.css';
 import { RouteComponentProps } from 'react-router-dom';
-import { TransactionStatus, useBlockNumber } from '@usedapp/core';
+import { TransactionStatus, useBlockNumber, useEthers } from '@usedapp/core';
 import { AlertModal, setAlertModal } from '../../state/slices/application';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -33,6 +34,7 @@ import {
 } from '../../wrappers/subgraph';
 import { getNounVotes } from '../../utils/getNounsVotes';
 import { Trans } from '@lingui/macro';
+import { NoTrans } from '../../i18n/NoTrans';
 import { i18n } from '@lingui/core';
 import { ReactNode } from 'react-markdown/lib/react-markdown';
 import { AVERAGE_BLOCK_TIME_IN_SECS } from '../../utils/constants';
@@ -51,14 +53,16 @@ const VotePage = ({
   },
 }: RouteComponentProps<{ id: string }>) => {
   const proposal = useProposal(id);
+  const { account } = useEthers();
 
   const [showVoteModal, setShowVoteModal] = useState<boolean>(false);
   const [showDynamicQuorumInfoModal, setShowDynamicQuorumInfoModal] = useState<boolean>(false);
   // Toggle between Noun centric view and delegate view
-  const [isDelegateView, setIsDelegateView] = useState(false);
+  const [isDelegateView] = useState(false);
 
   const [isQueuePending, setQueuePending] = useState<boolean>(false);
   const [isExecutePending, setExecutePending] = useState<boolean>(false);
+  const [isCancelPending, setCancelPending] = useState<boolean>(false);
 
   const dispatch = useAppDispatch();
   const setModal = useCallback((modal: AlertModal) => dispatch(setAlertModal(modal)), [dispatch]);
@@ -70,6 +74,7 @@ const VotePage = ({
 
   const { queueProposal, queueProposalState } = useQueueProposal();
   const { executeProposal, executeProposalState } = useExecuteProposal();
+  const { cancelProposal, cancelProposalState } = useCancelProposal();
 
   // Get and format date from data
   const timestamp = Date.now();
@@ -109,12 +114,28 @@ const VotePage = ({
   );
 
   const hasSucceeded = proposal?.status === ProposalState.SUCCEEDED;
+  const isInNonFinalState = [
+    ProposalState.PENDING,
+    ProposalState.ACTIVE,
+    ProposalState.SUCCEEDED,
+    ProposalState.QUEUED,
+  ].includes(proposal?.status!);
+  const isCancellable =
+    isInNonFinalState && proposal?.proposer?.toLowerCase() === account?.toLowerCase();
+
   const isAwaitingStateChange = () => {
     if (hasSucceeded) {
       return true;
     }
     if (proposal?.status === ProposalState.QUEUED) {
       return new Date() >= (proposal?.eta ?? Number.MAX_SAFE_INTEGER);
+    }
+    return false;
+  };
+
+  const isAwaitingDestructiveStateChange = () => {
+    if (isCancellable) {
+      return true;
     }
     return false;
   };
@@ -136,7 +157,6 @@ const VotePage = ({
     return endDate;
   };
 
-  const moveStateButtonAction = hasSucceeded ? <Trans>Queue</Trans> : <Trans>Execute</Trans>;
   const moveStateAction = (() => {
     if (hasSucceeded) {
       return () => {
@@ -150,6 +170,16 @@ const VotePage = ({
         return executeProposal(proposal.id);
       }
     };
+  })();
+
+  const destructiveStateAction = (() => {
+    if (isCancellable) {
+      return () => {
+        if (proposal?.id) {
+          return cancelProposal(proposal.id);
+        }
+      };
+    }
   })();
 
   const onTransactionStateChange = useCallback(
@@ -219,6 +249,11 @@ const VotePage = ({
     [executeProposalState, onTransactionStateChange, setModal],
   );
 
+  useEffect(
+    () => onTransactionStateChange(cancelProposalState, '提案をキャンセルしました！', setCancelPending),
+    [cancelProposalState, onTransactionStateChange, setModal],
+  );
+
   const activeAccount = useAppSelector(state => state.account.activeAccount);
   const {
     loading,
@@ -284,6 +319,7 @@ const VotePage = ({
           proposal={proposal}
           againstVotesAbsolute={againstNouns.length}
           onDismiss={() => setShowDynamicQuorumInfoModal(false)}
+          currentQuorum={currentQuorum}
         />
       )}
       <VoteModal
@@ -303,35 +339,46 @@ const VotePage = ({
         )}
       </Col>
       <Col lg={10} className={clsx(classes.proposal, classes.wrapper)}>
-        {isAwaitingStateChange() && (
+        {(isAwaitingStateChange() || isAwaitingDestructiveStateChange()) && (
           <Row className={clsx(classes.section, classes.transitionStateButtonSection)}>
-            <Col className="d-grid">
-              <Button
-                onClick={moveStateAction}
-                disabled={isQueuePending || isExecutePending}
-                variant="dark"
-                className={classes.transitionStateButton}
-              >
-                {isQueuePending || isExecutePending ? (
-                  <Spinner animation="border" />
-                ) : (
-                  <Trans>{moveStateButtonAction} Proposal ⌐◧-◧</Trans>
-                )}
-              </Button>
+            <Col className="d-grid gap-4">
+              {isAwaitingStateChange() && (
+                <Button
+                  onClick={moveStateAction}
+                  disabled={isQueuePending || isExecutePending}
+                  variant="dark"
+                  className={classes.transitionStateButton}
+                >
+                  {isQueuePending || isExecutePending ? (
+                    <Spinner animation="border" />
+                  ) : (
+                    hasSucceeded ? (
+                      <NoTrans>提案を実行待ちにする ⌐◧-◧</NoTrans>
+                    ) : (
+                      <NoTrans>提案を実行する ⌐◧-◧</NoTrans>
+                    )
+                  )}
+                </Button>
+              )}
+
+              {isAwaitingDestructiveStateChange() && (
+                <Button
+                  onClick={destructiveStateAction}
+                  disabled={isCancelPending}
+                  variant="danger"
+                  className={classes.destructiveTransitionStateButton}
+                >
+                  {isCancelPending ? (
+                    <Spinner animation="border" />
+                  ) : (
+                    <NoTrans>提案をキャンセルする ⌐◧-◧</NoTrans>
+                  )}
+                </Button>
+              )}
             </Col>
           </Row>
         )}
 
-        <p
-          onClick={() => setIsDelegateView(!isDelegateView)}
-          className={classes.toggleDelegateVoteView}
-        >
-          {isDelegateView ? (
-            <Trans>Switch to Noun view</Trans>
-          ) : (
-            <Trans>Switch to delegate view</Trans>
-          )}
-        </p>
         <Row>
           <VoteCard
             proposal={proposal}
@@ -363,7 +410,7 @@ const VotePage = ({
         <Row>
           <Col xl={4} lg={12}>
             <Card className={classes.voteInfoCard}>
-              <Card.Body className="p-2">
+              <Card.Body className="p-2 mb-3">
                 <div className={classes.voteMetadataRow}>
                   <div className={classes.voteMetadataRowTitle}>
                     <h1>
@@ -375,7 +422,7 @@ const VotePage = ({
                       id={'view-dq-info'}
                       className={classes.delegateHover}
                       getContent={dataTip => {
-                        return <Trans>View Dynamic Quorum Info</Trans>;
+                        return <Trans>View Threshold Info</Trans>;
                       }}
                     />
                   )}
@@ -383,9 +430,8 @@ const VotePage = ({
                     data-for="view-dq-info"
                     data-tip="View Dynamic Quorum Info"
                     onClick={() => setShowDynamicQuorumInfoModal(true && isV2Prop)}
-                    className={clsx(classes.thresholdInfo, isV2Prop ? classes.cursorPointer : '')}
+                    className={`${clsx(classes.thresholdInfo, isV2Prop ? classes.cursorPointer : '')} mt-2`}
                   >
-                    <span>{isV2Prop ? <Trans>Current Quorum</Trans> : <Trans>Quorum</Trans>}</span>
                     <h3>
                       <Trans>
                         {isV2Prop ? i18n.number(currentQuorum ?? 0) : proposal.quorumVotes} votes
@@ -429,7 +475,7 @@ const VotePage = ({
               <Card.Body className="p-2">
                 <div className={classes.voteMetadataRow}>
                   <div className={classes.voteMetadataRowTitle}>
-                    <h1>Snapshot</h1>
+                    <h1><Trans>Snapshot</Trans></h1>
                   </div>
                   <div className={classes.snapshotBlock}>
                     <span>

@@ -1,4 +1,4 @@
-import { Proposal, ProposalState, useProposalThreshold } from '../../wrappers/nounsDao';
+import { PartialProposal, ProposalState, useProposalThreshold } from '../../wrappers/nounsDao';
 import { Alert, Button } from 'react-bootstrap';
 import ProposalStatus from '../ProposalStatus';
 import classes from './Proposals.module.css';
@@ -6,7 +6,7 @@ import { useHistory } from 'react-router-dom';
 import { useBlockNumber, useEthers } from '@usedapp/core';
 import { isMobileScreen } from '../../utils/isMobile';
 import clsx from 'clsx';
-import { useUserNounTokenBalance, useUserVotes } from '../../wrappers/nounToken';
+import { useUserVotes } from '../../wrappers/nounToken';
 import { Trans } from '@lingui/macro';
 import { ClockIcon } from '@heroicons/react/solid';
 import proposalStatusClasses from '../ProposalStatus/ProposalStatus.module.css';
@@ -14,7 +14,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { useActiveLocale } from '../../hooks/useActivateLocale';
 import { SUPPORTED_LOCALE_TO_DAYSJS_LOCALE, SupportedLocale } from '../../i18n/locales';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import DelegationModal from '../DelegationModal';
 import { i18n } from '@lingui/core';
 import en from 'dayjs/locale/en';
@@ -22,7 +22,11 @@ import { AVERAGE_BLOCK_TIME_IN_SECS } from '../../utils/constants';
 
 dayjs.extend(relativeTime);
 
-const getCountdownCopy = (proposal: Proposal, currentBlock: number, locale: SupportedLocale) => {
+const getCountdownCopy = (
+  proposal: PartialProposal,
+  currentBlock: number,
+  locale: SupportedLocale,
+) => {
   const timestamp = Date.now();
   const startDate =
     proposal && timestamp && currentBlock
@@ -51,24 +55,26 @@ const getCountdownCopy = (proposal: Proposal, currentBlock: number, locale: Supp
       </Trans>
     );
   }
-  if (endDate?.isBefore(now)) {
+  if (endDate?.isBefore(now) && expiresDate?.isAfter(now)) {
     return (
       <Trans>
         Expires {expiresDate.locale(SUPPORTED_LOCALE_TO_DAYSJS_LOCALE[locale] || en).fromNow()}
       </Trans>
     );
   }
-  return (
-    <Trans>
-      Starts{' '}
-      {dayjs(startDate)
-        .locale(SUPPORTED_LOCALE_TO_DAYSJS_LOCALE[locale] || en)
-        .fromNow()}
-    </Trans>
-  );
+  if (startDate?.isAfter(now)) {
+    return (
+      <Trans>
+        Starts{' '}
+        {dayjs(startDate)
+          .locale(SUPPORTED_LOCALE_TO_DAYSJS_LOCALE[locale] || en)
+          .fromNow()}
+      </Trans>
+    );
+  }
 };
 
-const Proposals = ({ proposals }: { proposals: Proposal[] }) => {
+const Proposals = ({ proposals }: { proposals: PartialProposal[] }) => {
   const history = useHistory();
 
   const { account } = useEthers();
@@ -78,9 +84,8 @@ const Proposals = ({ proposals }: { proposals: Proposal[] }) => {
   const activeLocale = useActiveLocale();
   const [showDelegateModal, setShowDelegateModal] = useState(false);
 
-  const threshold = (useProposalThreshold() ?? 0) + 1;
+  const threshold = (useProposalThreshold() ?? 1);
   const hasEnoughVotesToPropose = account !== undefined && connectedAccountNounVotes >= threshold;
-  const hasNounBalance = (useUserNounTokenBalance() ?? 0) > 0;
 
   const nullStateCopy = () => {
     if (account !== null) {
@@ -115,16 +120,6 @@ const Proposals = ({ proposals }: { proposals: Proposal[] }) => {
               </Button>
             </div>
 
-            {hasNounBalance && (
-              <div className={classes.delegateBtnWrapper}>
-                <Button
-                  className={classes.changeDelegateBtn}
-                  onClick={() => setShowDelegateModal(true)}
-                >
-                  <Trans>Delegate</Trans>
-                </Button>
-              </div>
-            )}
           </div>
         ) : (
           <div className={clsx('d-flex', classes.nullStateSubmitProposalBtnWrapper)}>
@@ -134,36 +129,24 @@ const Proposals = ({ proposals }: { proposals: Proposal[] }) => {
                 <Trans>Submit Proposal</Trans>
               </Button>
             </div>
-            {!isMobile && hasNounBalance && (
-              <div className={classes.delegateBtnWrapper}>
-                <Button
-                  className={classes.changeDelegateBtn}
-                  onClick={() => setShowDelegateModal(true)}
-                >
-                  <Trans>Delegate</Trans>
-                </Button>
-              </div>
-            )}
           </div>
         )}
       </div>
       {isMobile && <div className={classes.nullStateCopy}>{nullStateCopy()}</div>}
-      {isMobile && hasNounBalance && (
-        <div>
-          <Button className={classes.changeDelegateBtn} onClick={() => setShowDelegateModal(true)}>
-            <Trans>Delegate</Trans>
-          </Button>
-        </div>
-      )}
       {proposals?.length ? (
         proposals
           .slice(0)
           .reverse()
           .map((p, i) => {
-            const isPropInStateToHaveCountDown =
+            let isPropInStateToHaveCountDown =
               p.status === ProposalState.PENDING ||
               p.status === ProposalState.ACTIVE ||
               p.status === ProposalState.QUEUED;
+
+            const countDownCopy = getCountdownCopy(p, currentBlock || 0, activeLocale);
+            if (!countDownCopy) {
+              isPropInStateToHaveCountDown = false;
+            }
 
             const countdownPill = (
               <div className={classes.proposalStatusWrapper}>
@@ -173,7 +156,7 @@ const Proposals = ({ proposals }: { proposals: Proposal[] }) => {
                       <ClockIcon height={16} width={16} />
                     </span>{' '}
                     <span className={classes.countdownPillText}>
-                      {getCountdownCopy(p, currentBlock || 0, activeLocale)}
+                      {countDownCopy}
                     </span>
                   </div>
                 </div>

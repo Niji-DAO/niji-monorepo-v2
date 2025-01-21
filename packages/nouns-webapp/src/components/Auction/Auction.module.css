@@ -1,3 +1,10 @@
+.wrapper {
+  height: calc(100vh - 140px); /* ヘッダーの高さを引いた分を設定 */
+  display: flex; /* Flexboxを有効化 */
+  flex-direction: column; /* 子要素を縦方向に並べる */
+  justify-content: center; /* 子要素を縦方向に中央揃え */
+}
+
 .nounWrapper {
   align-self: flex-end;
   width: 100%;
@@ -10,7 +17,7 @@
 .auctionActivityCol {
   padding-right: 5rem;
   padding-bottom: 0rem;
-  min-height: 520px;
+  /* min-height: 520px; */
   align-self: flex-end !important;
 }
 

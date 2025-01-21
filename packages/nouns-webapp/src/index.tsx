@@ -1,54 +1,51 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import { ApolloProvider, useQuery } from '@apollo/client';
+import { Web3Provider, WebSocketProvider } from '@ethersproject/providers';
+import { NounsAuctionHouseFactory } from '@nouns/sdk';
 import { ChainId, DAppProvider, DEFAULT_SUPPORTED_CHAINS } from '@usedapp/core';
 import { Web3ReactProvider } from '@web3-react/core';
-import { Web3Provider } from '@ethersproject/providers';
+import { ConnectedRouter, connectRouter, push, routerMiddleware } from 'connected-react-router';
+import dotenv from 'dotenv';
+import { BigNumber, BigNumberish } from 'ethers';
+import { createBrowserHistory, History } from 'history';
+import React, { useEffect } from 'react';
+import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+import { applyMiddleware, combineReducers, createStore, PreloadedState } from 'redux';
+import { composeWithDevTools } from 'redux-devtools-extension';
+import App from './App';
+import { BaseSepoliaChain } from './chain';
+import config, { CHAIN_ID, createNetworkHttpUrl, multicallOnLocalhost } from './config';
+import { useAppDispatch, useAppSelector } from './hooks';
+import { LanguageProvider } from './i18n/LanguageProvider';
+import './index.css';
+import reportWebVitals from './reportWebVitals';
 import account from './state/slices/account';
 import application from './state/slices/application';
-import logs from './state/slices/logs';
 import auction, {
+  appendBid,
   reduxSafeAuction,
-  reduxSafeNewAuction,
   reduxSafeBid,
+  reduxSafeNewAuction,
   setActiveAuction,
   setAuctionExtended,
   setAuctionSettled,
   setFullAuction,
 } from './state/slices/auction';
+import logs from './state/slices/logs';
 import onDisplayAuction, {
   setLastAuctionNounId,
   setOnDisplayAuctionNounId,
 } from './state/slices/onDisplayAuction';
-import { ApolloProvider, useQuery } from '@apollo/client';
-import { clientFactory, latestAuctionsQuery } from './wrappers/subgraph';
-import { useEffect } from 'react';
 import pastAuctions, { addPastAuctions } from './state/slices/pastAuctions';
 import LogsUpdater from './state/updaters/logs';
-import config, { CHAIN_ID, createNetworkHttpUrl, multicallOnLocalhost } from './config';
-import { WebSocketProvider } from '@ethersproject/providers';
-import { BigNumber, BigNumberish } from 'ethers';
-import { NounsAuctionHouseFactory } from '@nouns/sdk';
-import dotenv from 'dotenv';
-import { useAppDispatch, useAppSelector } from './hooks';
-import { appendBid } from './state/slices/auction';
-import { ConnectedRouter, connectRouter } from 'connected-react-router';
-import { createBrowserHistory, History } from 'history';
-import { applyMiddleware, createStore, combineReducers, PreloadedState } from 'redux';
-import { routerMiddleware } from 'connected-react-router';
-import { Provider } from 'react-redux';
-import { composeWithDevTools } from 'redux-devtools-extension';
 import { nounPath } from './utils/history';
-import { push } from 'connected-react-router';
-import { LanguageProvider } from './i18n/LanguageProvider';
-import { BaseSepoliaChain } from './chain';
-
+import { clientFactory, latestAuctionsQuery } from './wrappers/subgraph';
 
 dotenv.config();
 
 export const history = createBrowserHistory();
+
+console.log(`CHAIN_ID: ${CHAIN_ID}`);
 
 const createRootReducer = (history: History) =>
   combineReducers({
@@ -86,13 +83,8 @@ const supportedChainURLs = {
   [ChainId.Rinkeby]: createNetworkHttpUrl('rinkeby'),
   [ChainId.Hardhat]: 'http://localhost:8545',
   [ChainId.Goerli]: createNetworkHttpUrl('goerli'),
-  [ChainId.Sepolia]: createNetworkHttpUrl('sepolia'),
   [BaseSepoliaChain.chainId]: createNetworkHttpUrl('base-sepolia'),
 };
-
-console.log(`supportedChainURLs[CHAIN_ID]: ${supportedChainURLs[CHAIN_ID]}`);
-
-console.log(`CHAIN_ID: ${CHAIN_ID}`);
 
 // prettier-ignore
 const useDappConfig = {
@@ -106,7 +98,6 @@ const useDappConfig = {
   networks: [...DEFAULT_SUPPORTED_CHAINS, BaseSepoliaChain],
 };
 
-
 const client = clientFactory(config.app.subgraphApiUri);
 
 const Updaters = () => {
@@ -117,7 +108,7 @@ const Updaters = () => {
   );
 };
 
-const BLOCKS_PER_DAY = 6_500;
+const BLOCKS_PER_DAY = 7_200;
 
 const ChainSubscriber: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -171,7 +162,7 @@ const ChainSubscriber: React.FC = () => {
     dispatch(setFullAuction(reduxSafeAuction(currentAuction)));
     dispatch(setLastAuctionNounId(currentAuction.nounId.toNumber()));
 
-    // Fetch the previous 24hours of  bids
+    // Fetch the previous 24 hours of bids
     const previousBids = await nounsAuctionHouseContract.queryFilter(bidFilter, 0 - BLOCKS_PER_DAY);
     for (let event of previousBids) {
       if (event.args === undefined) return;
@@ -207,7 +198,6 @@ const PastAuctions: React.FC = () => {
 
   return <></>;
 };
-console.log(`config.app.jsonRpcUri: ${config.app.jsonRpcUri}`);
 
 ReactDOM.render(
   <Provider store={store}>
@@ -217,7 +207,6 @@ ReactDOM.render(
         <Web3ReactProvider
           getLibrary={
             provider => new Web3Provider(provider) // this will vary according to whether you use e.g. ethers or web3.js
-            // provider => new InfuraProvider(CHAIN_ID, config.app.jsonRpcUri)
           }
         >
           <ApolloProvider client={client}>

@@ -3,13 +3,14 @@ import { getNounData } from '../../utils/assets/utils';
 import ImageData from '../../utils/assets/image-data.json';
 import { buildSVG } from '@nouns/sdk';
 import { BigNumber as EthersBN } from 'ethers';
+import Image from 'react-bootstrap/Image';
+import { useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { setOnDisplayAuctionNounId } from '../../state/slices/onDisplayAuction';
 import { INounSeed, useNounSeed } from '../../wrappers/nounToken';
 import Noun from '../Noun';
-import { Link } from 'react-router-dom';
-import classes from './StandaloneNoun.module.css';
-import { useDispatch } from 'react-redux';
-import { setOnDisplayAuctionNounId } from '../../state/slices/onDisplayAuction';
 import nounClasses from '../Noun/Noun.module.css';
+import classes from './StandaloneNoun.module.css';
 
 interface StandaloneNounProps {
   nounId: EthersBN;
@@ -27,14 +28,11 @@ interface StandaloneNounWithSeedProps {
 
 export const getNoun = (nounId: string | EthersBN, seed: INounSeed) => {
   const id = nounId.toString();
-  const name = `Noun ${id}`;
-  const description = `Noun ${id} is a member of the Nouns DAO`;
-  console.log(`getNoun seed: ${seed}`);
+  const name = `Niji ${id}`;
+  const description = `Niji ${id} is a member of the Niji DAO`;
   const { parts, background } = getNounData(seed);
-  console.log(`getNoun parts: ${JSON.stringify(parts)}`);
-  console.log(`getNoun background: ${background}`);
+  // const image = `data:image/svg+xml;base64,${btoa(buildSVG(parts, data.palette, background))}`;
   const image = `data:image/svg+xml;base64,${btoa(buildSVG(parts, ImageData.palette, background))}`;
-  console.log(`getNoun image: ${image}`);
 
   return {
     name,
@@ -43,9 +41,16 @@ export const getNoun = (nounId: string | EthersBN, seed: INounSeed) => {
   };
 };
 
+export const StandaloneNounImage: React.FC<StandaloneNounProps> = (props: StandaloneNounProps) => {
+  const { nounId } = props;
+  const seed = useNounSeed(nounId);
+  const noun = seed && getNoun(nounId, seed);
+
+  return <Image src={noun ? noun.image : ''} fluid />;
+};
+
 const StandaloneNoun: React.FC<StandaloneNounProps> = (props: StandaloneNounProps) => {
   const { nounId } = props;
-  console.log(`StandaloneNoun nounId: ${nounId}`);
   const seed = useNounSeed(nounId);
   const noun = seed && getNoun(nounId, seed);
 
@@ -61,7 +66,7 @@ const StandaloneNoun: React.FC<StandaloneNounProps> = (props: StandaloneNounProp
       className={classes.clickableNoun}
       onClick={onClickHandler}
     >
-      <Noun imgPath={noun ? noun.image : ''} alt={noun ? noun.description : 'Noun'} />
+      <Noun imgPath={noun ? noun.image : ''} alt={noun ? noun.description : 'CNNoun'} />
     </Link>
   );
 };
@@ -78,7 +83,7 @@ export const StandaloneNounCircular: React.FC<StandaloneCircularNounProps> = (
     dispatch(setOnDisplayAuctionNounId(nounId.toNumber()));
   };
 
-  if (!seed || !nounId) return <Noun imgPath="" alt="Noun" />;
+  if (!seed || !nounId) return <Noun imgPath="" alt="CNNoun" />;
 
   return (
     <Link
@@ -88,7 +93,7 @@ export const StandaloneNounCircular: React.FC<StandaloneCircularNounProps> = (
     >
       <Noun
         imgPath={noun ? noun.image : ''}
-        alt={noun ? noun.description : 'Noun'}
+        alt={noun ? noun.description : 'CNNoun'}
         wrapperClassName={nounClasses.circularNounWrapper}
         className={border ? nounClasses.circleWithBorder : nounClasses.circular}
       />
@@ -116,7 +121,7 @@ export const StandaloneNounRoundedCorners: React.FC<StandaloneNounProps> = (
     >
       <Noun
         imgPath={noun ? noun.image : ''}
-        alt={noun ? noun.description : 'Noun'}
+        alt={noun ? noun.description : 'CNNoun'}
         className={nounClasses.rounded}
       />
     </Link>
@@ -129,12 +134,10 @@ export const StandaloneNounWithSeed: React.FC<StandaloneNounWithSeedProps> = (
   const { nounId, onLoadSeed, shouldLinkToProfile } = props;
 
   const dispatch = useDispatch();
-  console.log(`StandaloneNounWithSeed nounId: ${nounId}`);
   const seed = useNounSeed(nounId);
-  console.log(`StandaloneNounWithSeed seed: ${seed}`);
   const seedIsInvalid = Object.values(seed || {}).every(v => v === 0);
 
-  if (!seed || seedIsInvalid || !nounId || !onLoadSeed) return <Noun imgPath="" alt="Noun" />;
+  if (!seed || seedIsInvalid || !nounId || !onLoadSeed) return <Noun imgPath="" alt="CNNoun" />;
 
   onLoadSeed(seed);
 
