@@ -2,7 +2,11 @@ import { ChainId } from '@usedapp/core';
 import {
   ContractAddresses as NounsContractAddresses,
   getContractAddressesForChainOrThrow,
-} from '@nouns/sdk';
+} from './contract';
+// import {
+//   ContractAddresses as NounsContractAddresses,
+//   getContractAddressesForChainOrThrow,
+// } from '@nouns/sdk';
 import { BaseSepoliaChain } from './chain';
 
 interface ExternalContractAddresses {
