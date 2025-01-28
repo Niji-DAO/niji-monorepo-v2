@@ -1,6 +1,7 @@
 import { useAppSelector } from '../../hooks';
 import classes from './NavBar.module.css';
-import logo from '../../assets/cnn_logo.png';
+// import logo from '../../assets/cnn_logo.png';
+import logo from '../../assets/niji_logo.png';
 import { useHistory } from 'react-router';
 import { Link } from 'react-router-dom';
 import { Nav, Navbar, Container } from 'react-bootstrap';

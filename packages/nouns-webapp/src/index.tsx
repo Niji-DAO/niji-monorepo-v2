@@ -45,8 +45,6 @@ dotenv.config();
 
 export const history = createBrowserHistory();
 
-console.log(`CHAIN_ID: ${CHAIN_ID}`);
-
 const createRootReducer = (history: History) =>
   combineReducers({
     router: connectRouter(history),
