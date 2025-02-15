@@ -279,7 +279,7 @@ export const StandaloneNounRoundedCorners: React.FC<StandaloneNounProps> = (prop
 
 
 export const StandaloneNounWithSeed: React.FC<StandaloneNounWithSeedProps> = (props: StandaloneNounWithSeedProps) => {
-  const { nounId, onLoadSeed, shouldLinkToProfile } = props;
+  const { nounId, onLoadSeed } = props;
   const dispatch = useDispatch();
   const seed = useNounSeed(nounId);
   const [nounData, setNounData] = useState<{ image: string; description: string; fullImage: string } | null>(null);
