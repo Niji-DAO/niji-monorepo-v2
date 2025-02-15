@@ -32,7 +32,7 @@ interface StandaloneNounWithSeedProps {
 export const getNoun = async (nounId: string | EthersBN, seed: INounSeed) => {
   const id = nounId.toString();
   const name = `NIJI ${id}`;
-  const description = `NIJI ${id} is a member of the NIJI DAO`;
+  const description = `NIJI ${id} is a member of the NIJI`;
   const { parts, background, base64Image } = await getNounData(seed);
   // const image = `data:image/svg+xml;base64,${btoa(buildSVG(parts, data.palette, background))}`;
   const image = `data:image/svg+xml;base64,${btoa(buildSVG(parts, ImageData.palette, background))}`;
