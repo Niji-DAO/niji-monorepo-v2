@@ -47,7 +47,7 @@ const Documentation = (props: DocumentationProps = { backgroundColor: '#FFF' }) 
           </p>
           <p className={classes.aboutText}>
             <NoTrans>
-              CryptoNinja Nounsは、創造的なクリエイターを支援するためのプロジェクトです。
+              NIJIは、創造的なクリエイターを支援するためのプロジェクトです。
             </NoTrans>
           </p>
           <p className={classes.aboutText}>
@@ -57,7 +57,7 @@ const Documentation = (props: DocumentationProps = { backgroundColor: '#FFF' }) 
           </p>
           <p className={classes.aboutText} style={{ paddingBottom: '4rem' }}>
             <NoTrans>
-              CryptoNinja Nounsは、みんなのためにあります。
+              NIJIは、みんなのためにあります。
             </NoTrans>
           </p>
         </div>
@@ -90,12 +90,12 @@ const Documentation = (props: DocumentationProps = { backgroundColor: '#FFF' }) 
                 </li>
                 <li>
                   <NoTrans>
-                    すべてのCN Nounsオーナーたち（Ninjarz）は、CN Nouns DAOのメンバーです
+                    すべてのCN Nounsオーナーたち（Ninjarz）は、NIJI DAOのメンバーです
                   </NoTrans>
                 </li>
                 <li>
                   <NoTrans>
-                    CN Nouns DAOは「{nounsGovLink}」のフォークを使用しています
+                    NIJI DAOは「{nounsGovLink}」のフォークを使用しています
                   </NoTrans>
                 </li>
                 <li>
@@ -167,7 +167,7 @@ const Documentation = (props: DocumentationProps = { backgroundColor: '#FFF' }) 
             <Accordion.Body>
               <p className={classes.aboutText}>
                 <NoTrans>
-                  CN Nouns DAOは下記のDiscordサーバー内の「cnn-cryptoninja-nounsプロジェクト」にて、やりとりを行っています
+                  NIJI DAOは下記のDiscordサーバー内の「cnn-cryptoninja-nounsプロジェクト」にて、やりとりを行っています
                 </NoTrans>
                 <br/>
                 {ninjaDaoLnk}

@@ -1,5 +1,5 @@
 import ImageData from "./image-data.json"
-
+import { createCanvas, loadImage } from 'canvas';
 
 export interface NounSeed {
   background: number;
@@ -23,6 +23,7 @@ export interface EncodedImage {
 export interface NounData {
   parts: EncodedImage[];
   background: string;
+  base64Image: string;
 }
 
 const {
@@ -42,7 +43,71 @@ const {
 const images = ImageData.images;
 type ObjectKey = keyof typeof images;
 
-export const getNounData = (seed: NounSeed): NounData => {
+const getFileNames = (seed: NounSeed): string[] => {
+  return [
+    { category: "backDecorations", filename: backDecorations[seed.backDecoration]?.filename },
+    { category: "backgroundDecorations", filename: backgroundDecorations[seed.backgroundDecoration]?.filename },
+    { category: "specials", filename: specials[seed.special]?.filename },
+    { category: "leftHands", filename: leftHands[seed.leftHand]?.filename },
+    { category: "backs", filename: backs[seed.back]?.filename },
+    { category: "clothes", filename: clothes[seed.clothe]?.filename },
+    { category: "chokers", filename: chokers[seed.choker]?.filename },
+    { category: "ears", filename: ears[seed.ear]?.filename },
+    { category: "hairs", filename: hairs[seed.hair]?.filename },
+    { category: "hats", filename: hats[seed.hat]?.filename },
+    { category: "headphones", filename: headphones[seed.headphone]?.filename },
+  ]
+  .filter(item => item.filename) // `null` や `undefined` を除外
+  .map(item => `${item.category}/${item.filename}`); // `category/filename.png` の形式に変更
+};
+
+// 画像を合成して `base64` 文字列を取得する関数
+const generateCompositeImage = async (filenames: string[], backgroundColor: string): Promise<string | null> => {
+  console.log(`filenames: ${filenames}`);
+  console.log(`backgroundColor: ${backgroundColor}`);
+
+  const images = await Promise.all(
+    filenames.map(async (filePath) => {
+      try {
+        const imageUrl = (await import(`../../../src/assets/niji/${filePath}.PNG`)).default;
+        return loadImage(imageUrl);
+      } catch (error) {
+        console.warn(`画像の読み込みに失敗: ${filePath}`);
+        return null;
+      }
+    })
+  );
+
+  // 有効な画像のみ取得
+  const validImages = images.filter((img: any): img is CanvasImageSource => img !== null);
+  if (validImages.length === 0) {
+    console.error('有効な画像がありません。');
+    return null;
+  }
+
+  // キャンバス作成（最初の画像のサイズを基準に）
+  const width = validImages[0]?.width || 320;  // デフォルトサイズを設定
+  const height = validImages[0]?.height || 320;
+  const canvas = createCanvas(width, height);
+  const ctx = canvas.getContext('2d');
+
+  // **背景色を塗る（最下層）**
+  ctx.fillStyle = `#${backgroundColor}`;
+  ctx.fillRect(0, 0, width, height);
+
+  // 画像を下から順に描画
+  for (const img of validImages) {
+    if (img) {
+      ctx.drawImage(img, 0, 0, width, height);
+    }
+  }
+
+  // `base64` 文字列を取得
+  return canvas.toDataURL('image/png'); // "data:image/png;base64,..." の形式
+};
+
+
+export const getNounData = async (seed: NounSeed): Promise<NounData> => {
   console.log(`NounSeed seed: ${seed}`);
   console.log(`backDecorations length: ${backDecorations.length}`);
   console.log(`backgroundDecorations length: ${backgroundDecorations.length}`);
@@ -101,6 +166,16 @@ export const getNounData = (seed: NounSeed): NounData => {
   console.log(
     `headphones[seed.headphone]: ${JSON.stringify(headphones[seed.headphone])}`,
   );
+  const backgroundColor = ImageData.bgcolors[seed.background];
+
+  // 画像ファイル名を取得
+  const filenames = getFileNames(seed);
+
+  // 画像を合成（背景色を一番下に入れる）
+  const base64Image = await generateCompositeImage(filenames, backgroundColor);
+
+  console.log(`base64Image: ${base64Image}`);
+
   return {
     parts: [
       backDecorations[seed.backDecoration],
@@ -116,6 +191,7 @@ export const getNounData = (seed: NounSeed): NounData => {
       headphones[seed.headphone],
     ],
     background: ImageData.bgcolors[seed.background],
+    base64Image: base64Image || '',
   };
 };
 

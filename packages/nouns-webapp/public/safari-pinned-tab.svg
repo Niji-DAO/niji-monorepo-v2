@@ -1,1 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?><svg id="CNNouns_Black" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 198 198"><defs><style>.cls-1{fill:#000000;}</style></defs><rect class="cls-1" width="169.71" height="28.29"/><rect class="cls-1" x="141.43" y="19.29" width="28.29" height="65.57"/><rect class="cls-1" x="84.86" y="56.57" width="28.29" height="28.29"/><rect class="cls-1" x="28.29" y="56.57" width="28.29" height="28.29"/><rect class="cls-1" x="56.57" y="84.86" width="28.29" height="28.29"/><rect class="cls-1" y="113.14" width="28.29" height="56.57"/><rect class="cls-1" x="56.57" y="141.43" width="28.29" height="56.57"/><rect class="cls-1" x="75.86" y="169.71" width="93.86" height="28.29"/><rect class="cls-1" x="169.71" y="113.14" width="28.29" height="28.29"/><rect class="cls-1" x="113.14" y="113.14" width="28.29" height="28.29"/></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="CNNouns_Black" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 198 198">
+  <!-- Generator: Adobe Illustrator 29.2.1, SVG Export Plug-In . SVG Version: 2.1.0 Build 116)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <rect width="198" height="198"/>
+  <path class="st0" d="M155.3,162.4h-30.7l-51.3-77.8v77.8h-30.7V35.6h30.7l51.3,78.6V35.6h30.7v126.8Z"/>
+</svg>

@@ -135,7 +135,7 @@ const Playground: React.FC = () => {
                 }}
                 className={classes.primaryBtn}
               >
-                <Trans>Generate CN Nouns</Trans>
+                <Trans>Generate NIJI</Trans>
               </Button>
             </Col>
             <Row>

@@ -89,7 +89,7 @@ const DynamicQuorumInfoModalOverlay: React.FC<{
               <Trans>
                 The Threshold (minimum number of For votes required to pass a proposal) is set as a
                 function of the number of Against votes a proposal has recieved. It increases
-                linearly as a function of the % of CN Nouns voting against a prop, varying between Min
+                linearly as a function of the % of NIJI voting against a prop, varying between Min
                 Threshold and Max Threshold.
               </Trans>
             ) : (
@@ -126,7 +126,7 @@ const DynamicQuorumInfoModalOverlay: React.FC<{
             <div className={classes.graphWrapper}>
               {/* Y-Axis label */}
               <div className={classes.yAxisText}>
-                <Trans>Required % of CN Nouns to Pass</Trans>
+                <Trans>Required % of NIJI to Pass</Trans>
               </div>
 
               {/* Inner graph container */}
@@ -203,8 +203,8 @@ const DynamicQuorumInfoModalOverlay: React.FC<{
                       <text x="20" y="280">
                         Min Threshold: {Math.floor((minQuorumBps * totalNounSupply) / 10_000)}{' '}
                         {Math.floor((minQuorumBps * totalNounSupply) / 10_000) === 1
-                          ? 'CN Noun'
-                          : 'CN Nouns'}{' '}
+                          ? 'NIJI'
+                          : 'NIJI'}{' '}
                         <tspan fill="var(--brand-gray-light-text)">
                           ({minQuorumBps / 100}% of Nouns)
                         </tspan>
@@ -233,7 +233,7 @@ const DynamicQuorumInfoModalOverlay: React.FC<{
                     >
                       {currentQuorum}{' '}
                       <tspan fill="var(--brand-gray-light-text)">
-                        ({againstVotesAbs} {againstVotesAbs === 1 ? 'CN Noun' : 'CN Nouns'} Currently
+                        ({againstVotesAbs} {againstVotesAbs === 1 ? 'NIJI' : 'NIJI'} Currently
                         Against)
                       </tspan>
                     </text>
@@ -244,7 +244,7 @@ const DynamicQuorumInfoModalOverlay: React.FC<{
                     >
                       {currentQuorum}{' '}
                       <tspan fill="var(--brand-gray-light-text)">
-                        ({againstVotesAbs} {againstVotesAbs === 1 ? 'CN Noun' : 'CN Nouns'} Currently
+                        ({againstVotesAbs} {againstVotesAbs === 1 ? 'NIJI' : 'NIJI'} Currently
                         Against)
                       </tspan>
                     </text>
@@ -265,7 +265,7 @@ const DynamicQuorumInfoModalOverlay: React.FC<{
             </div>
 
             <div className={classes.xAxisText}>
-              <Trans>% of CN Nouns Currently Against</Trans>
+              <Trans>% of NIJI Currently Against</Trans>
             </div>
           </div>
 

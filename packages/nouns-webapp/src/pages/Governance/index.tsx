@@ -26,11 +26,11 @@ const GovernancePage = () => {
             <Trans>Governance</Trans>
           </span>
           <h1>
-            <Trans>CN Nouns DAO</Trans>
+            <Trans>NIJI DAO</Trans>
           </h1>
         </Row>
         <p className={classes.subheading}>
-          <NoTrans><span className={classes.boldText}>CN Nouns DAO</span>では提案に対して投票を行えます。また、提案の提出には最低でも<span className={classes.boldText}>{nounsRequired}体</span>のCN Nounが必要です。</NoTrans>
+          <NoTrans><span className={classes.boldText}>NIJI DAO</span>では提案に対して投票を行えます。また、提案の提出には最低でも<span className={classes.boldText}>{nounsRequired}体</span>のCN Nounが必要です。</NoTrans>
         </p>
 
         <Row className={classes.treasuryInfoCard}>
@@ -61,9 +61,9 @@ const GovernancePage = () => {
           </Col>
           <Col className={classes.treasuryInfoText}>
             <Trans>
-              This treasury exists for <span className={classes.boldText}>CN Nouns DAO</span>{' '}
+              This treasury exists for <span className={classes.boldText}>NIJI DAO</span>{' '}
               participants to allocate resources for the long-term growth and prosperity of the
-              CN Nouns project.
+              NIJI project.
             </Trans>
           </Col>
         </Row>

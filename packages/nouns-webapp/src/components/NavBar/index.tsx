@@ -17,6 +17,7 @@ import NavWallet from '../NavWallet';
 import { Trans } from '@lingui/macro';
 import { useState } from 'react';
 import { useTreasuryBalance } from '../../hooks/useTreasuryBalance';
+import { faGavel } from "@fortawesome/free-solid-svg-icons";
 
 const NavBar = () => {
   const activeAccount = useAppSelector(state => state.account.activeAccount);
@@ -51,7 +52,7 @@ const NavBar = () => {
         <Container style={{ maxWidth: 'unset' }}>
           <div className={classes.brandAndTreasuryWrapper}>
             <Navbar.Brand as={Link} to="/" className={classes.navBarBrand}>
-              <img src={logo} className={classes.navBarLogo} alt="CN Nouns DAO logo" />
+              <img src={logo} className={classes.navBarLogo} alt="NIJI DAO logo" />
             </Navbar.Brand>
             {Number(CHAIN_ID) !== 1 && (
               <Nav.Item>
@@ -81,6 +82,20 @@ const NavBar = () => {
             onClick={() => setIsNavExpanded(!isNavExpanded)}
           />
           <Navbar.Collapse className="justify-content-end">
+            <Nav.Link href="https://niji-lp.vercel.app/" className={classes.nounsNavLink} onClick={closeNav} target="_blank" rel="noopener noreferrer">
+              <NavBarButton
+                buttonText={<Trans>LP</Trans>}
+                buttonIcon={<img src="/safari-pinned-tab.svg" alt="LP" width="16" height="16" />}
+                buttonStyle={nonWalletButtonStyle}
+              />
+            </Nav.Link>
+            <Nav.Link as={Link} to="/vote" className={classes.nounsNavLink} onClick={closeNav}>
+              <NavBarButton
+                buttonText={<Trans>AUCTION</Trans>}
+                buttonIcon={<FontAwesomeIcon icon={faGavel} />}
+                buttonStyle={nonWalletButtonStyle}
+              />
+            </Nav.Link>
             <Nav.Link as={Link} to="/vote" className={classes.nounsNavLink} onClick={closeNav}>
               <NavBarButton
                 buttonText={<Trans>DAO</Trans>}
