@@ -1,4 +1,4 @@
-import { mainnet, goerli, hardhat, baseSepolia } from 'wagmi/chains';
+import { mainnet, goerli, hardhat, baseSepolia, base } from 'wagmi/chains';
 import {
   ContractAddresses as NounsContractAddresses,
   getContractAddressesForChainOrThrow,
@@ -21,7 +21,7 @@ interface AppConfig {
   enableHistory: boolean;
 }
 
-type SupportedChains = typeof mainnet.id | typeof goerli.id | typeof hardhat.id | typeof baseSepolia.id;
+type SupportedChains = typeof mainnet.id | typeof goerli.id | typeof hardhat.id | typeof baseSepolia.id | typeof base.id;
 
 interface CacheBucket {
   name: string;
@@ -84,6 +84,12 @@ const app: Record<SupportedChains, AppConfig> = {
     subgraphApiUri: 'https://api.studio.thegraph.com/query/91004/niji-testnet/version/latest',
     enableHistory: process.env.REACT_APP_ENABLE_HISTORY === 'true',
   },
+  [base.id]: {
+    jsonRpcUri: createNetworkHttpUrl('base'),
+    wsRpcUri: createNetworkWsUrl('base'),
+    subgraphApiUri: 'https://api.studio.thegraph.com/query/91004/niji-mainnet/version/latest',
+    enableHistory: process.env.REACT_APP_ENABLE_HISTORY === 'true',
+  },
 };
 
 const externalAddresses: Record<SupportedChains, ExternalContractAddresses> = {
@@ -109,6 +115,13 @@ const externalAddresses: Record<SupportedChains, ExternalContractAddresses> = {
     chainlinkEthUsdc: undefined,
   },
   [baseSepolia.id]: {
+    lidoToken: undefined,
+    usdcToken: undefined,
+    payerContract: undefined,
+    tokenBuyer: undefined,
+    chainlinkEthUsdc: undefined,
+  },
+  [base.id]: {
     lidoToken: undefined,
     usdcToken: undefined,
     payerContract: undefined,

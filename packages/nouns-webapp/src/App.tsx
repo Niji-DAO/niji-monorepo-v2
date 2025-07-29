@@ -44,7 +44,7 @@ function App() {
 
   return (
     <div className={`${classes.wrapper}`}>
-      {Number(CHAIN_ID) !== cachedChainId && <NetworkAlert />}
+      {address && Number(CHAIN_ID) !== cachedChainId && <NetworkAlert />}
       {alertModal.show && (
         <AlertModal
           title={alertModal.title}

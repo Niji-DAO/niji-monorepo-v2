@@ -1,0 +1,12 @@
+.walletButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.connectingText {
+  text-align: center;
+  color: #6c757d;
+  margin-top: 15px;
+}

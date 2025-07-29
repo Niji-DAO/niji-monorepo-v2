@@ -9,8 +9,7 @@ import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { applyMiddleware, combineReducers, createStore, PreloadedState } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
-import { WagmiProvider, createConfig, http } from 'wagmi';
-import { mainnet, goerli, hardhat, baseSepolia } from 'wagmi/chains';
+import { WagmiProvider } from 'wagmi';
 import App from './App';
 import config from './config';
 import { useAppDispatch, useAppSelector } from './hooks';
@@ -71,15 +70,7 @@ const store = configureStore({});
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
-const wagmiConfig = createConfig({
-  chains: [mainnet, goerli, hardhat, baseSepolia],
-  transports: {
-    [mainnet.id]: http(),
-    [goerli.id]: http(),
-    [hardhat.id]: http(),
-    [baseSepolia.id]: http(),
-  },
-});
+import { wagmiConfig } from './utils/appkit';
 
 const queryClient = new QueryClient();
 

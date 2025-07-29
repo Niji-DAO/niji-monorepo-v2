@@ -9,7 +9,7 @@ import { Bid } from '../../utils/types';
 import clsx from 'clsx';
 import auctionActivityClasses from '../AuctionActivity/BidHistory.module.css';
 import _trophy from '../../assets/icons/trophy.svg';
-import Davatar from '@davatar/react';
+import Identicon from '../Identicon';
 import { usePublicClient } from 'wagmi';
 import { useReverseENSLookUp } from '../../utils/ensLookup';
 import { containsBlockedText } from '../../utils/moderation/containsBlockedText';
@@ -37,7 +37,7 @@ const BidHistoryModalRow: React.FC<BidHistoryModalRowProps> = props => {
         <div className={auctionActivityClasses.leftSectionWrapper}>
           <div className={auctionActivityClasses.bidder}>
             <div className={classes.bidderInfoWrapper}>
-              <Davatar size={40} address={bid.sender} />
+              <Identicon size={40} address={bid.sender} />
               <div className={classes.bidderInfoText}>
                 <span>
                   {ens && !ensMatchesBlocklistRegex ? shortENS(ens) : shortAddress}

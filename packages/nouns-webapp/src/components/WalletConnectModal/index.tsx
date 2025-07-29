@@ -13,19 +13,28 @@ const WalletConnectModal: React.FC<{ onDismiss: () => void }> = props => {
     <div className={classes.walletConnectModal}>
       <WalletButton
         onClick={() => {
-          connect({ connector: connectors.find(c => c.id === 'injected')! });
+          const metamaskConnector = connectors.find(c => c.id === 'metaMask' || c.id === 'injected');
+          if (metamaskConnector) {
+            connect({ connector: metamaskConnector });
+          }
         }}
         walletType={WALLET_TYPE.metamask}
       />
       <WalletButton
         onClick={() => {
-          connect({ connector: connectors.find(c => c.id === 'walletConnect')! });
+          const wcConnector = connectors.find(c => c.id === 'walletConnect');
+          if (wcConnector) {
+            connect({ connector: wcConnector });
+          }
         }}
         walletType={WALLET_TYPE.walletconnect}
       />
       <WalletButton
         onClick={() => {
-          connect({ connector: connectors.find(c => c.id === 'injected')! });
+          const braveConnector = connectors.find(c => c.id === 'metaMask' || c.id === 'injected');
+          if (braveConnector) {
+            connect({ connector: braveConnector });
+          }
         }}
         walletType={WALLET_TYPE.brave}
       />

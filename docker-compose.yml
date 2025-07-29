@@ -110,12 +110,16 @@ services:
       - subgraph-deploy
     ports:
       - "3001:3000"
+    volumes:
+      - ./packages/nouns-webapp/src:/app/src
+      - ./packages/nouns-webapp/public:/app/public
     env_file:
       - ./packages/nouns-webapp/.env
     environment:
       - REACT_APP_CHAIN_ID=31337
       - REACT_APP_JSONRPC_PROVIDER=http://localhost:8545
       - REACT_APP_GRAPH_ENDPOINT=http://localhost:8000/subgraphs/name/nouns/nouns-subgraph
+      - CHOKIDAR_USEPOLLING=true
     networks:
       - nouns-network
 
