@@ -1,24 +1,22 @@
+import React, { useEffect } from 'react';
 import Auction from '../../components/Auction';
 // import Documentation from '../../components/Documentation';
+import ProfileActivityFeed from '../../components/ProfileActivityFeed';
 import { useAppDispatch, useAppSelector } from '../../hooks';
 import { setOnDisplayAuctionNounId } from '../../state/slices/onDisplayAuction';
-import { push } from 'connected-react-router';
-import { nounPath } from '../../utils/history';
+import { useParams, useNavigate } from 'react-router-dom';
 import useOnDisplayAuction from '../../wrappers/onDisplayAuction';
-import { useEffect } from 'react';
-import ProfileActivityFeed from '../../components/ProfileActivityFeed';
+import { nounPath } from '../../utils/history';
 
-interface AuctionPageProps {
-  initialAuctionId?: number;
-}
-
-const AuctionPage: React.FC<AuctionPageProps> = props => {
-  const { initialAuctionId } = props;
+const AuctionPage: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const initialAuctionId = id ? Number(id) : undefined;
   const onDisplayAuction = useOnDisplayAuction();
   const lastAuctionNounId = useAppSelector(state => state.onDisplayAuction.lastAuctionNounId);
   const onDisplayAuctionNounId = onDisplayAuction?.nounId.toNumber();
 
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!lastAuctionNounId) return;
@@ -27,7 +25,7 @@ const AuctionPage: React.FC<AuctionPageProps> = props => {
       // handle out of bounds noun path ids
       if (initialAuctionId > lastAuctionNounId || initialAuctionId < 0) {
         dispatch(setOnDisplayAuctionNounId(lastAuctionNounId));
-        dispatch(push(nounPath(lastAuctionNounId)));
+        navigate(nounPath(lastAuctionNounId));
       } else {
         if (onDisplayAuction === undefined) {
           // handle regular noun path ids on first load

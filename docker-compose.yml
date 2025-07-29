@@ -1,0 +1,129 @@
+services:
+  # Ethereum Node (Hardhat)
+  hardhat:
+    build:
+      context: .
+      dockerfile: ./packages/nouns-contracts/Dockerfile
+    container_name: niji-monorepo-v2-hardhat
+    ports:
+      - "8545:8545"
+    networks:
+      - nouns-network
+    volumes:
+      - contracts-artifacts:/app/artifacts
+    env_file:
+      - ./packages/nouns-contracts/.env
+    command: npx hardhat node --hostname 0.0.0.0
+
+  # Nouns Contracts Deployment
+  contracts-deploy:
+    build:
+      context: .
+      dockerfile: ./packages/nouns-contracts/Dockerfile
+    container_name: niji-monorepo-v2-contracts-deploy
+    depends_on:
+      - hardhat
+    networks:
+      - nouns-network
+    volumes:
+      - contracts-artifacts:/app/artifacts
+    env_file:
+      - ./packages/nouns-contracts/.env
+    command: sh -c "sleep 10 && yarn task:run-local"
+
+  # PostgreSQL for Graph Node
+  postgres:
+    image: postgres:14
+    container_name: niji-monorepo-v2-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: graph-node
+      POSTGRES_PASSWORD: let-me-in
+      POSTGRES_DB: graph-node
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - nouns-network
+
+  # IPFS for Graph Node
+  ipfs:
+    image: ipfs/go-ipfs:v0.10.0
+    container_name: niji-monorepo-v2-ipfs
+    ports:
+      - "5001:5001"
+      - "8080:8080"
+    volumes:
+      - ipfs-data:/data/ipfs
+    networks:
+      - nouns-network
+
+  # Graph Node
+  graph-node:
+    image: graphprotocol/graph-node:v0.35.1
+    container_name: niji-monorepo-v2-graph-node
+    depends_on:
+      - postgres
+      - ipfs
+      - hardhat
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+      - "8020:8020"
+      - "8030:8030"
+      - "8040:8040"
+    environment:
+      postgres_host: postgres
+      postgres_user: graph-node
+      postgres_pass: let-me-in
+      postgres_db: graph-node
+      ipfs: ipfs:5001
+      ethereum: mainnet:http://hardhat:8545
+      GRAPH_LOG: info
+    networks:
+      - nouns-network
+
+  # Nouns Subgraph Deployment
+  subgraph-deploy:
+    build:
+      context: .
+      dockerfile: ./packages/nouns-subgraph/Dockerfile
+    container_name: niji-monorepo-v2-subgraph-deploy
+    depends_on:
+      - graph-node
+      - contracts-deploy
+    networks:
+      - nouns-network
+    volumes:
+      - contracts-artifacts:/contracts
+    command: sh -c "sleep 30 && yarn codegen && npx graph create --node http://graph-node:8020/ nounsdao/nouns-subgraph && npx graph deploy --product hosted-service --node http://graph-node:8020/ --ipfs http://ipfs:5001/ nounsdao/nouns-subgraph --version-label v0.0.1"
+
+  # Nouns WebApp
+  nouns-webapp:
+    build:
+      context: .
+      dockerfile: ./packages/nouns-webapp/Dockerfile
+    container_name: niji-monorepo-v2-webapp
+    depends_on:
+      - hardhat
+      - subgraph-deploy
+    ports:
+      - "3001:3000"
+    env_file:
+      - ./packages/nouns-webapp/.env
+    environment:
+      - REACT_APP_CHAIN_ID=31337
+      - REACT_APP_JSONRPC_PROVIDER=http://localhost:8545
+      - REACT_APP_GRAPH_ENDPOINT=http://localhost:8000/subgraphs/name/nouns/nouns-subgraph
+    networks:
+      - nouns-network
+
+networks:
+  nouns-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  ipfs-data:
+  contracts-artifacts:

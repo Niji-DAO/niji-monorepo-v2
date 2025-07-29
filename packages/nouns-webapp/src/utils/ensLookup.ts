@@ -1,5 +1,5 @@
-import { useEthers } from '@usedapp/core';
 import { useEffect, useState } from 'react';
+import { usePublicClient } from 'wagmi';
 import { cache, cacheKey, CHAIN_ID } from '../config';
 import { lookupNNSOrENS } from './lookupNNSOrENS';
 
@@ -8,12 +8,12 @@ export const ensCacheKey = (address: string) => {
 };
 
 export const useReverseENSLookUp = (address: string) => {
-  const { library } = useEthers();
+  const provider = usePublicClient();
   const [ens, setEns] = useState<string>();
 
   useEffect(() => {
     let mounted = true;
-    if (address && library) {
+    if (address && provider) {
       // Look for resolved ENS in local storage (result of pre-fetching)
       const maybeCachedENSResultRaw = localStorage.getItem(ensCacheKey(address));
       if (maybeCachedENSResultRaw) {
@@ -28,7 +28,7 @@ export const useReverseENSLookUp = (address: string) => {
       // If address not in local storage, attempt to resolve via RPC call.
       // At this stage if the item is in local storage we know it isn't expired.
       if (!localStorage.getItem(ensCacheKey(address))) {
-        lookupNNSOrENS(library, address)
+        lookupNNSOrENS(provider, address)
           .then(name => {
             if (!name) return;
             if (mounted) {
@@ -49,10 +49,10 @@ export const useReverseENSLookUp = (address: string) => {
     }
 
     return () => {
-      setEns('');
+      setEns(undefined);
       mounted = false;
     };
-  }, [address, library]);
+  }, [address, provider]);
 
   return ens;
 };

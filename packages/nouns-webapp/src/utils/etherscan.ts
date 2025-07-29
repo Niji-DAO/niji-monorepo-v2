@@ -1,11 +1,9 @@
-import { ChainId } from '@usedapp/core';
+import { mainnet, goerli } from 'wagmi/chains';
 import { CHAIN_ID, ETHERSCAN_API_KEY } from '../config';
 
-const getBaseURL = (network: ChainId) => {
+const getBaseURL = (network: number) => {
   switch (network) {
-    case ChainId.Rinkeby:
-      return 'https://rinkeby.etherscan.io/';
-    case ChainId.Goerli:
+    case goerli.id:
       return 'https://goerli.etherscan.io/';
     default:
       return 'https://etherscan.io/';
@@ -34,11 +32,9 @@ export const buildEtherscanHoldingsLink = (address: string): string => {
   return new URL(path, BASE_URL).toString();
 };
 
-const getApiBaseURL = (network: ChainId) => {
+const getApiBaseURL = (network: number) => {
   switch (network) {
-    case ChainId.Rinkeby:
-      return `https://api-rinkeby.etherscan.io/`;
-    case ChainId.Goerli:
+    case goerli.id:
       return 'https://api-goerli.etherscan.io/';
     default:
       return 'https://api.etherscan.io/';

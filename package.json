@@ -8,7 +8,36 @@
     "clean": "lerna run --parallel clean",
     "prepare": "lerna run prepare --scope=@nouns/{assets,contracts,sdk}",
     "lint": "eslint 'packages/**/*.ts' --fix",
-    "format": "prettier --write 'packages/**/*.{ts(x)?,sol,md,css,json}' '!**/typechain/**'"
+    "format": "prettier --write 'packages/**/*.{ts(x)?,sol,md,css,json}' '!**/typechain/**'",
+    "dev": "concurrently -n \"hardhat,subgraph,webapp\" -c \"yellow,blue,green\" \"yarn dev:contracts\" \"yarn dev:subgraph\" \"yarn dev:webapp\"",
+    "dev:contracts": "cd packages/nouns-contracts && yarn hardhat node",
+    "dev:subgraph": "cd packages/nouns-subgraph && yarn dev",
+    "dev:webapp": "cd packages/nouns-webapp && yarn start",
+    "dev:all": "concurrently -n \"hardhat,postgres,ipfs,graph,subgraph,webapp\" -c \"yellow,blue,magenta,cyan,green,white\" \"yarn dev:contracts\" \"yarn dev:postgres\" \"yarn dev:ipfs\" \"yarn dev:graph-node\" \"yarn dev:subgraph\" \"yarn dev:webapp\"",
+    "dev:postgres": "docker run --name nouns-postgres -e POSTGRES_USER=graph-node -e POSTGRES_PASSWORD=let-me-in -e POSTGRES_DB=graph-node -p 5432:5432 -d postgres:14",
+    "dev:ipfs": "docker run --name nouns-ipfs -p 5001:5001 -p 8080:8080 -d ipfs/go-ipfs:v0.10.0",
+    "dev:graph-node": "cd packages/nouns-subgraph && docker-compose up graph-node",
+    "setup:local": "yarn install && yarn prepare && yarn contracts:deploy:local && yarn subgraph:deploy:local",
+    "contracts:deploy:local": "cd packages/nouns-contracts && yarn deploy:local",
+    "subgraph:deploy:local": "cd packages/nouns-subgraph && yarn codegen && yarn build && yarn create-local && yarn deploy-local",
+    "start": "yarn start:infra && sleep 5 && yarn start:apps",
+    "start:infra": "yarn start:postgres && yarn start:ipfs && yarn start:graph-node",
+    "start:postgres": "docker run --name nouns-postgres -e POSTGRES_USER=graph-node -e POSTGRES_PASSWORD=let-me-in -e POSTGRES_DB=graph-node -e POSTGRES_INITDB_ARGS='-E UTF8 --locale=C' -p 5432:5432 -d postgres:14 2>/dev/null || echo 'PostgreSQL already running'",
+    "start:ipfs": "docker run --name nouns-ipfs -p 5001:5001 -p 8080:8080 -d ipfs/go-ipfs:v0.10.0 2>/dev/null || echo 'IPFS already running'",
+    "start:graph-node": "docker run --name nouns-graph-node -p 8000:8000 -p 8001:8001 -p 8020:8020 -p 8030:8030 -p 8040:8040 --add-host=host.docker.internal:host-gateway -e postgres_host=host.docker.internal -e postgres_user=graph-node -e postgres_pass=let-me-in -e postgres_db=graph-node -e ipfs=host.docker.internal:5001 -e ethereum=mainnet:http://host.docker.internal:8545 -e GRAPH_LOG=info -d graphprotocol/graph-node 2>/dev/null || echo 'Graph Node already running'",
+    "start:apps": "concurrently -n \"contracts,subgraph,webapp\" -c \"yellow,blue,green\" \"yarn start:contracts\" \"yarn start:subgraph\" \"yarn start:webapp\"",
+    "start:contracts": "cd packages/nouns-contracts && yarn install && npx hardhat node",
+    "start:subgraph": "sleep 15 && cd packages/nouns-subgraph && yarn install && yarn prepare:hardhat && yarn codegen && yarn build && yarn create:localnode nounsdao/nouns-subgraph && yarn deploy:localnode nounsdao/nouns-subgraph",
+    "start:webapp": "sleep 30 && cd packages/nouns-webapp && yarn install && yarn start",
+    "stop": "yarn stop:apps && yarn stop:infra",
+    "stop:apps": "pkill -f 'hardhat node' || true",
+    "stop:infra": "docker stop nouns-postgres nouns-ipfs nouns-graph-node 2>/dev/null || true && docker rm nouns-postgres nouns-ipfs nouns-graph-node 2>/dev/null || true",
+    "docker:start": "docker-compose build && docker-compose up -d",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:build": "docker-compose build",
+    "docker:logs": "docker-compose logs -f",
+    "clean:docker": "docker-compose down -v && docker system prune -f"
   },
   "devDependencies": {
     "@types/chai": "^4.2.15",
@@ -17,6 +46,7 @@
     "@typescript-eslint/eslint-plugin": "^4.26.0",
     "@typescript-eslint/parser": "^4.26.0",
     "chai": "^4.2.0",
+    "concurrently": "^8.2.2",
     "eslint": "^7.28.0",
     "eslint-config-prettier": "^8.3.0",
     "husky": "^5.0.9",
@@ -50,5 +80,9 @@
   "volta": {
     "node": "20.12.0",
     "yarn": "1.22.19"
+  },
+  "dependencies": {
+    "viem": "^2.31.4",
+    "wagmi": "^2.15.6"
   }
 }

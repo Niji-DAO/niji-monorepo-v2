@@ -1,14 +1,13 @@
 import { useQuery } from '@apollo/client';
 import { NounsDAOV2ABI } from '@nouns/sdk';
 import {
-  ChainId,
+  useAccount,
   useBlockNumber,
-  useContractCall,
-  useContractCalls,
-  useContractFunction,
-  useEthers,
-} from '@usedapp/core';
-import { connectContractToSigner } from '@usedapp/core/dist/cjs/src/hooks';
+  useReadContract,
+  useReadContracts,
+  useWriteContract,
+} from 'wagmi';
+import { decodeEventLog } from 'viem';
 import BigNumber from 'bignumber.js';
 import { ethers, BigNumber as EthersBN, utils } from 'ethers';
 import { defaultAbiCoder, Result } from 'ethers/lib/utils';
@@ -18,8 +17,9 @@ import config, { CHAIN_ID } from '../config';
 import { useBlockTimestamp } from '../hooks/useBlockTimestamp';
 import { useLogs } from '../hooks/useLogs';
 import { partialProposalsQuery, proposalQuery } from './subgraph';
+import { mainnet } from 'wagmi/chains';
 
-const abi = new utils.Interface(NounsDAOV2ABI);
+const abi = NounsDAOV2ABI;
 const nounsDaoContract = new ethers.Contract(
   config.addresses.nounsDAOProxy,
   NounsDAOV2ABI,
@@ -142,7 +142,7 @@ export interface ProposalTransaction {
 }
 
 // Start the log search at the mainnet deployment block to speed up log queries
-const fromBlock = CHAIN_ID === ChainId.Mainnet ? 12985453 : 0;
+const fromBlock = CHAIN_ID === mainnet.id ? 12985453 : 0;
 const proposalCreatedFilter = {
   ...nounsDaoContract.filters?.ProposalCreated(
     null,
@@ -159,7 +159,7 @@ const proposalCreatedFilter = {
 };
 
 const hashRegex = /^\s*#{1,6}\s+([^\n]+)/;
-const equalTitleRegex = /^\s*([^\n]+)\n(={3,25}|-{3,25})/;
+const equalTitleRegex = /^\s*([^\n]+)\n(={3,25}|-{3,25})/
 
 /**
  * Extract a markdown title from a proposal body that uses the `# Title` format
@@ -195,60 +195,52 @@ export const useCurrentQuorum = (
   proposalId: number,
   skip: boolean = false,
 ): number | undefined => {
-  const request = () => {
-    if (skip) return false;
-    return {
-      abi,
-      address: nounsDao,
-      method: 'quorumVotes',
-      args: [proposalId],
-    };
-  };
-  const [quorum] = useContractCall<[EthersBN]>(request()) || [];
-  return quorum?.toNumber();
+  const { data: quorum } = useReadContract({
+    abi,
+    address: nounsDao as `0x${string}`,
+    functionName: 'quorumVotes',
+    args: [proposalId],
+    query: { enabled: !skip },
+  });
+  return quorum ? Number(quorum) : undefined;
 };
 
 export const useDynamicQuorumProps = (
   nounsDao: string,
   block: number,
 ): DynamicQuorumParams | undefined => {
-  const [params] =
-    useContractCall<[DynamicQuorumParams]>({
-      abi,
-      address: nounsDao,
-      method: 'getDynamicQuorumParamsAt',
-      args: [block],
-    }) || [];
+  const { data: params } = useReadContract({
+    abi,
+    address: nounsDao as `0x${string}`,
+    functionName: 'getDynamicQuorumParamsAt',
+    args: [block],
+  });
 
-  return params;
+  return params as DynamicQuorumParams | undefined;
 };
 
 export const useHasVotedOnProposal = (proposalId: string | undefined): boolean => {
-  const { account } = useEthers();
+  const { address } = useAccount();
 
-  // Fetch a voting receipt for the passed proposal id
-  const [receipt] =
-    useContractCall<[any]>({
-      abi,
-      address: nounsDaoContract.address,
-      method: 'getReceipt',
-      args: [proposalId, account],
-    }) || [];
-  return receipt?.hasVoted ?? false;
+  const { data: receipt } = useReadContract({
+    abi,
+    address: nounsDaoContract.address as `0x${string}`,
+    functionName: 'getReceipt',
+    args: [proposalId, address],
+  });
+  return (receipt as any)?.hasVoted ?? false;
 };
 
 export const useProposalVote = (proposalId: string | undefined): string => {
-  const { account } = useEthers();
+  const { address } = useAccount();
 
-  // Fetch a voting receipt for the passed proposal id
-  const [receipt] =
-    useContractCall<[any]>({
-      abi,
-      address: nounsDaoContract.address,
-      method: 'getReceipt',
-      args: [proposalId, account],
-    }) || [];
-  const voteStatus = receipt?.support ?? -1;
+  const { data: receipt } = useReadContract({
+    abi,
+    address: nounsDaoContract.address as `0x${string}`,
+    functionName: 'getReceipt',
+    args: [proposalId, address],
+  });
+  const voteStatus = (receipt as any)?.support ?? -1;
   if (voteStatus === 0) {
     return 'Against';
   }
@@ -263,25 +255,23 @@ export const useProposalVote = (proposalId: string | undefined): string => {
 };
 
 export const useProposalCount = (): number | undefined => {
-  const [count] =
-    useContractCall<[EthersBN]>({
-      abi,
-      address: nounsDaoContract.address,
-      method: 'proposalCount',
-      args: [],
-    }) || [];
-  return count?.toNumber();
+  const { data: count } = useReadContract({
+    abi,
+    address: nounsDaoContract.address as `0x${string}`,
+    functionName: 'proposalCount',
+    args: [],
+  });
+  return count ? Number(count) : undefined;
 };
 
 export const useProposalThreshold = (): number | undefined => {
-  const [count] =
-    useContractCall<[EthersBN]>({
-      abi,
-      address: nounsDaoContract.address,
-      method: 'proposalThreshold',
-      args: [],
-    }) || [];
-  return count?.toNumber();
+  const { data: count } = useReadContract({
+    abi,
+    address: nounsDaoContract.address as `0x${string}`,
+    functionName: 'proposalThreshold',
+    args: [],
+  });
+  return count ? Number(count) : undefined;
 };
 
 const countToIndices = (count: number | undefined) => {
@@ -328,18 +318,22 @@ const useFormattedProposalCreatedLogs = (skip: boolean, fromBlock?: number) => {
 
   return useMemo(() => {
     return useLogsResult?.logs?.map(log => {
-      const { args: parsed } = abi.parseLog(log);
+      const { args: parsed } = decodeEventLog({
+        abi,
+        data: log.data as `0x${string}`,
+        topics: log.topics as [signature: `0x${string}`, ...args: `0x${string}`[]],
+      });
       return {
-        description: parsed.description,
+        description: (parsed as any)?.description,
         transactionHash: log.transactionHash,
-        details: formatProposalTransactionDetails(parsed),
+        details: formatProposalTransactionDetails(parsed as any),
       };
     });
   }, [useLogsResult]);
 };
 
 const getProposalState = (
-  blockNumber: number | undefined,
+  blockNumber: bigint | undefined,
   blockTimestamp: Date | undefined,
   proposal: PartialProposalSubgraphEntity,
 ) => {
@@ -348,7 +342,7 @@ const getProposalState = (
     if (!blockNumber) {
       return ProposalState.UNDETERMINED;
     }
-    if (blockNumber <= parseInt(proposal.startBlock)) {
+    if (blockNumber <= BigInt(proposal.startBlock)) {
       return ProposalState.PENDING;
     }
     status = ProposalState.ACTIVE;
@@ -357,7 +351,7 @@ const getProposalState = (
     if (!blockNumber) {
       return ProposalState.UNDETERMINED;
     }
-    if (blockNumber > parseInt(proposal.endBlock)) {
+    if (blockNumber > BigInt(proposal.endBlock)) {
       const forVotes = new BigNumber(proposal.forVotes);
       if (forVotes.lte(proposal.againstVotes) || forVotes.lt(proposal.quorumVotes)) {
         return ProposalState.DEFEATED;
@@ -383,7 +377,7 @@ const getProposalState = (
 
 const parsePartialSubgraphProposal = (
   proposal: PartialProposalSubgraphEntity | undefined,
-  blockNumber: number | undefined,
+  blockNumber: bigint | undefined,
   timestamp: number | undefined,
 ) => {
   if (!proposal) {
@@ -406,14 +400,14 @@ const parsePartialSubgraphProposal = (
 
 const parseSubgraphProposal = (
   proposal: ProposalSubgraphEntity | undefined,
-  blockNumber: number | undefined,
+  blockNumber: bigint | undefined,
   timestamp: number | undefined,
 ) => {
   if (!proposal) {
     return;
   }
 
-  const description = proposal.description?.replace(/\\n/g, '\n').replace(/(^['"]|['"]$)/g, '');
+  const description = proposal.description?.replace(/\n/g, '\n').replace(/(^['"]|['"]$)/g, '');
   return {
     id: proposal.id,
     title: R.pipe(extractTitle, removeMarkdownStyle)(description) ?? 'Untitled',
@@ -436,7 +430,7 @@ const parseSubgraphProposal = (
 
 export const useAllProposalsViaSubgraph = (): PartialProposalData => {
   const { loading, data, error } = useQuery(partialProposalsQuery());
-  const blockNumber = useBlockNumber();
+  const { data: blockNumber } = useBlockNumber();
   const timestamp = useBlockTimestamp(blockNumber);
 
   const proposals = data?.proposals?.map((proposal: ProposalSubgraphEntity) =>
@@ -458,35 +452,35 @@ export const useAllProposalsViaChain = (skip = false): PartialProposalData => {
   }, [proposalCount]);
 
   const requests = (method: string) => {
-    if (skip) return [false];
+    if (skip) return [];
     return govProposalIndexes.map(index => ({
       abi,
-      method,
-      address: nounsDaoContract.address,
+      functionName: method,
+      address: nounsDaoContract.address as `0x${string}`,
       args: [index],
     }));
   };
 
-  const proposals = useContractCalls<[ProposalCallResult]>(requests('proposals'));
-  const proposalStates = useContractCalls<[ProposalState]>(requests('state'));
+  const { data: proposals } = useReadContracts<any>({ contracts: requests('proposals') });
+  const { data: proposalStates } = useReadContracts<any>({ contracts: requests('state') });
 
   const formattedLogs = useFormattedProposalCreatedLogs(skip);
 
   // Early return until events are fetched
   return useMemo(() => {
     const logs = formattedLogs ?? [];
-    if (proposals.length && !logs.length) {
+    if (proposals?.length && !logs.length) {
       return { data: [], loading: true };
     }
 
     return {
-      data: proposals.map((p, i) => {
-        const proposal = p?.[0];
-        const description = logs[i]?.description?.replace(/\\n/g, '\n');
+      data: proposals?.map((p, i) => {
+        const proposal = p?.result as ProposalCallResult;
+        const description = logs[i]?.description?.replace(/\n/g, '\n');
         return {
           id: proposal?.id.toString(),
           title: R.pipe(extractTitle, removeMarkdownStyle)(description) ?? 'Untitled',
-          status: proposalStates[i]?.[0] ?? ProposalState.UNDETERMINED,
+          status: proposalStates?.[i]?.result as ProposalState ?? ProposalState.UNDETERMINED,
 
           startBlock: parseInt(proposal?.startBlock?.toString() ?? ''),
           endBlock: parseInt(proposal?.endBlock?.toString() ?? ''),
@@ -494,9 +488,9 @@ export const useAllProposalsViaChain = (skip = false): PartialProposalData => {
           againstCount: parseInt(proposal?.againstVotes?.toString() ?? '0'),
           abstainCount: parseInt(proposal?.abstainVotes?.toString() ?? '0'),
           quorumVotes: parseInt(proposal?.quorumVotes?.toString() ?? '0'),
-          eta: proposal?.eta ? new Date(proposal?.eta?.toNumber() * 1000) : undefined,
+          eta: proposal?.eta ? new Date(Number(proposal?.eta) * 1000) : undefined,
         };
-      }),
+      }) ?? [],
       loading: false,
     };
   }, [formattedLogs, proposalStates, proposals]);
@@ -509,110 +503,93 @@ export const useAllProposals = (): PartialProposalData => {
 };
 
 export const useProposal = (id: string | number): Proposal | undefined => {
-  const blockNumber = useBlockNumber();
+  const { data: blockNumber } = useBlockNumber();
   const timestamp = useBlockTimestamp(blockNumber);
   return parseSubgraphProposal(useQuery(proposalQuery(id)).data?.proposal, blockNumber, timestamp);
 };
 
 export const useCastVote = () => {
-  const { send: castVote, state: castVoteState } = useContractFunction(
-    nounsDaoContract as any,
-    'castVote',
-  );
-  return { castVote, castVoteState };
+  const { writeContract, ...state } = useWriteContract();
+  return {
+    castVote: async (proposalId: string, support: Vote) => {
+      writeContract({
+        address: config.addresses.nounsDAOProxy as `0x${string}`,
+        abi,
+        functionName: 'castVote',
+        args: [BigInt(proposalId), support],
+      });
+    },
+    castVoteState: state,
+  };
 };
 
 export const useCastVoteWithReason = () => {
-  const { send: castVoteWithReason, state: castVoteWithReasonState } = useContractFunction(
-    nounsDaoContract as any,
-    'castVoteWithReason',
-  );
-  return { castVoteWithReason, castVoteWithReasonState };
+  const { writeContract, ...state } = useWriteContract();
+  return {
+    castVoteWithReason: async (proposalId: string, support: Vote, reason: string) => {
+      writeContract({
+        address: config.addresses.nounsDAOProxy as `0x${string}`,
+        abi,
+        functionName: 'castVoteWithReason',
+        args: [BigInt(proposalId), support, reason],
+      });
+    },
+    castVoteWithReasonState: state,
+  };
 };
 
 export const useCastRefundableVote = () => {
-  const { library } = useEthers();
-  const { send: castRefundableVote, state: castRefundableVoteState } = useContractFunction(
-    nounsDaoContract as any,
-    'castRefundableVote',
-  );
+  const { writeContract, ...state } = useWriteContract();
 
   return {
-    castRefundableVote: async (proposalId: any, support: any): Promise<void> => {
-      const contract = connectContractToSigner(
-        nounsDaoContract as any,
-        undefined,
-        library && 'getSigner' in library ? library.getSigner() : undefined,
-      );
-      const gasLimit = await contract.estimateGas.castRefundableVote(proposalId, support);
-      await castRefundableVote(proposalId, support, {
-        gasLimit: gasLimit.add(20_000), // A 20,000 gas pad is used to avoid 'Out of gas' errors
+    castRefundableVote: async (proposalId: string, support: Vote): Promise<void> => {
+      writeContract({
+        address: config.addresses.nounsDAOProxy as `0x${string}`,
+        abi,
+        functionName: 'castRefundableVote',
+        args: [BigInt(proposalId), support],
       });
     },
-    castRefundableVoteState,
+    castRefundableVoteState: state,
   };
 };
 
 export const useCastRefundableVoteWithReason = () => {
-  const { library } = useEthers();
-  // prettier-ignore
-  const { send: castRefundableVoteWithReason, state: castRefundableVoteWithReasonState } = useContractFunction(
-    nounsDaoContract as any,
-    'castRefundableVoteWithReason',
-  );
+  const { writeContract, ...state } = useWriteContract();
 
   return {
     castRefundableVoteWithReason: async (
-      proposalId: any,
-      support: any,
-      reason: any,
+      proposalId: string,
+      support: Vote,
+      reason: string,
     ): Promise<void> => {
-      const contract = connectContractToSigner(
-        nounsDaoContract as any,
-        undefined,
-        library && 'getSigner' in library ? library.getSigner() : undefined,
-      );
-      const gasLimit = await contract.estimateGas.castRefundableVoteWithReason(
-        proposalId,
-        support,
-        reason,
-      );
-      await castRefundableVoteWithReason(proposalId, support, reason, {
-        gasLimit: gasLimit.add(20_000), // A 20,000 gas pad is used to avoid 'Out of gas' errors
+      writeContract({
+        address: config.addresses.nounsDAOProxy as `0x${string}`,
+        abi,
+        functionName: 'castRefundableVoteWithReason',
+        args: [BigInt(proposalId), support, reason],
       });
     },
-    castRefundableVoteWithReasonState,
+    castRefundableVoteWithReasonState: state,
   };
 };
 
 export const usePropose = () => {
-  const { send: propose, state: proposeState } = useContractFunction(
-    nounsDaoContract as any,
-    'propose',
-  );
-  return { propose, proposeState };
+  const { writeContract, ...state } = useWriteContract();
+  return { propose: writeContract, proposeState: state };
 };
 
 export const useQueueProposal = () => {
-  const { send: queueProposal, state: queueProposalState } = useContractFunction(
-    nounsDaoContract as any,
-    'queue',
-  );
-  return { queueProposal, queueProposalState };
+  const { writeContract, ...state } = useWriteContract();
+  return { queueProposal: writeContract, queueProposalState: state };
 };
 
 export const useCancelProposal = () => {
-  const { send: cancelProposal, state: cancelProposalState } = useContractFunction(
-    nounsDaoContract as any,
-    'cancel',
-  );
-  return { cancelProposal, cancelProposalState };
+  const { writeContract, ...state } = useWriteContract();
+  return { cancelProposal: writeContract, cancelProposalState: state };
 };
 
 export const useExecuteProposal = () => {
-  const { send: executeProposal, state: executeProposalState } = useContractFunction(
-    nounsDaoContract as any,
-    'execute',
-  );
-  return { executeProposal, executeProposalState };
+  const { writeContract, ...state } = useWriteContract();
+  return { executeProposal: writeContract, executeProposalState: state };
 };

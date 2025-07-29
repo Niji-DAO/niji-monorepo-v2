@@ -1,5 +1,5 @@
 import { Trans } from '@lingui/macro';
-import { useEthers } from '@usedapp/core';
+import { useAccount } from 'wagmi';
 import React from 'react';
 import { useShortAddress } from '../../utils/addressAndENSDisplayUtils';
 import { useUserDelegatee } from '../../wrappers/nounToken';
@@ -15,7 +15,7 @@ interface CurrentDelegatePannelProps {
 const CurrentDelegatePannel: React.FC<CurrentDelegatePannelProps> = props => {
   const { onPrimaryBtnClick, onSecondaryBtnClick } = props;
 
-  const { account: maybeAccount } = useEthers();
+  const { address: maybeAccount } = useAccount();
   const delegate = useUserDelegatee();
   const account = delegate ?? maybeAccount ?? '';
   const shortAccount = useShortAddress(account);

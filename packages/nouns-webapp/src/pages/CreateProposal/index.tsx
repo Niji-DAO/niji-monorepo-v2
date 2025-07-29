@@ -8,10 +8,11 @@ import {
   useProposalThreshold,
   usePropose,
 } from '../../wrappers/nounsDao';
+import { NounsDAOV2ABI } from '@nouns/sdk';
 import { useUserVotes } from '../../wrappers/nounToken';
 import classes from './CreateProposal.module.css';
 import { Link } from 'react-router-dom';
-import { useEthers } from '@usedapp/core';
+import { useAccount } from 'wagmi';
 import { AlertModal, setAlertModal } from '../../state/slices/application';
 import ProposalEditor from '../../components/ProposalEditor';
 import CreateProposalButton from '../../components/CreateProposalButton';
@@ -27,7 +28,7 @@ import config from '../../config';
 import { useEthNeeded } from '../../utils/tokenBuyerContractUtils/tokenBuyer';
 
 const CreateProposalPage = () => {
-  const { account } = useEthers();
+  const { address: account } = useAccount();
   const latestProposalId = useProposalCount();
   const latestProposal = useProposal(latestProposalId ?? 0);
   const availableVotes = useUserVotes();
@@ -83,14 +84,16 @@ const CreateProposalPage = () => {
           calldata: '0x',
           signature: '',
         });
-      } else {
+      }
+      else {
         if (parseInt(ethNeeded) > 0) {
           const indexOfTokenBuyerTopUp =
             proposalTransactions
               .map((txn, index: number) => {
                 if (txn.address === config.addresses.tokenBuyer) {
                   return index;
-                } else {
+                }
+                else {
                   return -1;
                 }
               })
@@ -140,13 +143,18 @@ const CreateProposalPage = () => {
   const handleCreateProposal = async () => {
     if (!proposalTransactions?.length) return;
 
-    await propose(
-      proposalTransactions.map(({ address }) => address), // Targets
-      proposalTransactions.map(({ value }) => value ?? '0'), // Values
-      proposalTransactions.map(({ signature }) => signature), // Signatures
-      proposalTransactions.map(({ calldata }) => calldata), // Calldatas
-      `# ${titleValue}\n\n${bodyValue}`, // Description
-    );
+    await propose({
+      address: config.addresses.nounsDAOProxy as `0x${string}`,
+      abi: NounsDAOV2ABI,
+      functionName: 'propose',
+      args: [
+        proposalTransactions.map(({ address }) => address), // Targets
+        proposalTransactions.map(({ value }) => value ?? '0'), // Values
+        proposalTransactions.map(({ signature }) => signature), // Signatures
+        proposalTransactions.map(({ calldata }) => calldata), // Calldatas
+        `# ${titleValue}\n\n${bodyValue}`, // Description
+      ],
+    });
   };
 
   const [showTransactionFormModal, setShowTransactionFormModal] = useState(false);
@@ -157,13 +165,13 @@ const CreateProposalPage = () => {
 
   useEffect(() => {
     switch (proposeState.status) {
-      case 'None':
+      case 'idle':
         setProposePending(false);
         break;
-      case 'Mining':
+      case 'pending':
         setProposePending(true);
         break;
-      case 'Success':
+      case 'success':
         setModal({
           title: <Trans>Success</Trans>,
           message: <Trans>Proposal Created!</Trans>,
@@ -171,18 +179,10 @@ const CreateProposalPage = () => {
         });
         setProposePending(false);
         break;
-      case 'Fail':
+      case 'error':
         setModal({
           title: <Trans>Transaction Failed</Trans>,
-          message: proposeState?.errorMessage || <Trans>Please try again.</Trans>,
-          show: true,
-        });
-        setProposePending(false);
-        break;
-      case 'Exception':
-        setModal({
-          title: <Trans>Error</Trans>,
-          message: proposeState?.errorMessage || <Trans>Please try again.</Trans>,
+          message: proposeState?.error?.message || <Trans>Please try again.</Trans>,
           show: true,
         });
         setProposePending(false);

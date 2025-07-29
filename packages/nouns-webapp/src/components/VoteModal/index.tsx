@@ -1,8 +1,9 @@
 import { Button, FloatingLabel, FormControl, Spinner } from 'react-bootstrap';
+import { getBytecode } from 'viem/actions';
 import classes from './VoteModal.module.css';
 import { useCastRefundableVote, useCastRefundableVoteWithReason, useCastVote, useCastVoteWithReason, Vote } from '../../wrappers/nounsDao';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
-import { TransactionStatus, useEthers } from '@usedapp/core';
+import { useAccount, usePublicClient } from 'wagmi';
 import NavBarButton, { NavBarButtonStyle } from '../NavBarButton';
 import clsx from 'clsx';
 import { Trans } from '@lingui/macro';
@@ -19,7 +20,8 @@ interface VoteModalProps {
 const POST_SUCESSFUL_VOTE_MODAL_CLOSE_TIME_MS = 3000;
 
 const VoteModal = ({ show, onHide, proposalId, availableVotes }: VoteModalProps) => {
-  const { library, account } = useEthers();
+  const provider = usePublicClient();
+  const { address: account } = useAccount();
   const { castVote, castVoteState } = useCastVote();
   const { castVoteWithReason, castVoteWithReasonState } = useCastVoteWithReason();
   const { castRefundableVote, castRefundableVoteState } = useCastRefundableVote();
@@ -39,29 +41,21 @@ const VoteModal = ({ show, onHide, proposalId, availableVotes }: VoteModalProps)
     return error;
   };
 
-  const handleVoteStateChange = useCallback((state: TransactionStatus) => {
+  const handleVoteStateChange = useCallback((state: any) => {
     switch (state.status) {
-      case 'None':
+      case 'idle':
         setIsLoading(false);
         break;
-      case 'Mining':
+      case 'pending':
         setIsLoading(true);
         break;
-      case 'Success':
+      case 'success':
         setIsLoading(false);
         setIsVoteSuccessful(true);
         break;
-      case 'Fail':
+      case 'error':
         setFailureCopy(<Trans>Transaction Failed</Trans>);
-        setErrorMessage(state?.errorMessage || <Trans>Please try again.</Trans>);
-        setIsLoading(false);
-        setIsVoteFailed(true);
-        break;
-      case 'Exception':
-        setFailureCopy(<Trans>Error</Trans>);
-        setErrorMessage(
-          getVoteErrorMessage(state?.errorMessage) || <Trans>Please try again.</Trans>,
-        );
+        setErrorMessage(state?.error?.message || <Trans>Please try again.</Trans>);
         setIsLoading(false);
         setIsVoteFailed(true);
         break;
@@ -69,10 +63,10 @@ const VoteModal = ({ show, onHide, proposalId, availableVotes }: VoteModalProps)
   }, []);
 
   const signerIsContract = async () => {
-    if (!library || !account) {
+    if (!provider || !account) {
       return false;
     }
-    const code = await library?.getCode(account);
+    const code = await getBytecode(provider, { address: account });
     return code !== '0x';
   };
 
@@ -269,3 +263,4 @@ const VoteModal = ({ show, onHide, proposalId, availableVotes }: VoteModalProps)
   );
 };
 export default VoteModal;
+

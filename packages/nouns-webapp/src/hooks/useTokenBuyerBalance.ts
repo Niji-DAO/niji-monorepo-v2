@@ -1,52 +1,37 @@
-import { useMemo, useEffect, useState } from 'react';
-import { Contract } from '@ethersproject/contracts';
-import { useEthers } from '@usedapp/core';
-import { utils, BigNumber } from 'ethers';
-import ERC20 from '../libs/abi/ERC20.json';
+import { useBalance, useReadContract } from 'wagmi';
+import { BigNumber } from 'ethers';
 import config from '../config';
+import { chainlinkAggregatorV3InterfaceABI } from '../abis/chainlinkAggregatorV3Interface';
 
 const { addresses } = config;
 
-const erc20Interface = new utils.Interface(ERC20);
-const chainlinkInterface = ['function latestAnswer() external view returns (int256)'];
-
 function useTokenBuyerBalance(): BigNumber | undefined {
-  const { library } = useEthers();
+  const { data: ethBalance } = useBalance({
+    address: addresses.tokenBuyer as `0x${string}`,
+  });
 
-  const [ethBalance, setETHBalance] = useState<BigNumber | undefined>();
-  const [usdcBalance, setUSDCBalance] = useState<BigNumber | undefined>();
-  const [ethUsdcPrice, setETHUSDCPrice] = useState<BigNumber | undefined>();
+  const { data: usdcBalance } = useBalance({
+    address: addresses.payerContract as `0x${string}`,
+    token: addresses.usdcToken as `0x${string}`,
+  });
 
-  const usdcContract = useMemo((): Contract | undefined => {
-    if (!library || !addresses.usdcToken) return;
-    return new Contract(addresses.usdcToken, erc20Interface, library);
-  }, [library]);
-  const chainlinkEthUsdcContract = useMemo((): Contract | undefined => {
-    if (!library || !addresses.chainlinkEthUsdc) return;
-    return new Contract(addresses.chainlinkEthUsdc, chainlinkInterface, library);
-  }, [library]);
+  const { data: ethUsdcPriceData } = useReadContract({
+    address: addresses.chainlinkEthUsdc as `0x${string}`,
+    abi: chainlinkAggregatorV3InterfaceABI,
+    functionName: 'latestRoundData',
+    args: [],
+  });
 
-  useEffect(() => {
-    if (!library || !addresses.tokenBuyer) return;
-    library.getBalance(addresses.tokenBuyer).then(setETHBalance);
-  }, [library]);
-
-  useEffect(() => {
-    if (!usdcContract || !addresses.payerContract) return;
-    usdcContract.balanceOf(addresses.payerContract).then(setUSDCBalance);
-  }, [usdcContract]);
-
-  useEffect(() => {
-    if (!chainlinkEthUsdcContract) return;
-    chainlinkEthUsdcContract.latestAnswer().then(setETHUSDCPrice);
-  }, [chainlinkEthUsdcContract]);
+  const ethUsdcPrice = ethUsdcPriceData ? BigNumber.from(ethUsdcPriceData[1]) : undefined;
 
   if (!ethUsdcPrice) {
-    return ethBalance;
+    return ethBalance ? BigNumber.from(ethBalance.value) : undefined;
   }
-  return ethBalance?.add(
-    usdcBalance?.mul(BigNumber.from(10).pow(20)).div(ethUsdcPrice) ?? BigNumber.from(0),
-  );
+
+  const ethBalanceBN = ethBalance ? BigNumber.from(ethBalance.value) : BigNumber.from(0);
+  const usdcBalanceBN = usdcBalance ? BigNumber.from(usdcBalance.value) : BigNumber.from(0);
+
+  return ethBalanceBN.add(usdcBalanceBN.mul(BigNumber.from(10).pow(20)).div(ethUsdcPrice));
 }
 
 export default useTokenBuyerBalance;

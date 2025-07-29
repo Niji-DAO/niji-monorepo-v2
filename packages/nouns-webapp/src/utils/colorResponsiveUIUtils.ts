@@ -1,10 +1,10 @@
 import { useAppSelector } from '../hooks';
 
-export const shouldUseStateBg = (history: any) => {
+export const shouldUseStateBg = (location: any) => {
   return (
-    history.location.pathname === '/' ||
-    history.location.pathname.includes('/noun') ||
-    history.location.pathname.includes('/auction')
+    location.pathname === '/' ||
+    location.pathname.includes('/noun') ||
+    location.pathname.includes('/auction')
   );
 };
 
@@ -14,11 +14,11 @@ export const shouldUseStateBg = (history: any) => {
  * @param whiteState  What to return if the state is white
  * @param coolState  What to return if the state is cool
  * @param warmState  What to return is the state is warm
- * @param history  History object from useHistory
+ * @param location  Location object from useLocation
  * @returns item corresponding to current state
  */
-export const usePickByState = (whiteState: any, coolState: any, warmState: any, history: any) => {
-  const useStateBg = shouldUseStateBg(history);
+export const usePickByState = (whiteState: any, coolState: any, warmState: any, location: any) => {
+  const useStateBg = shouldUseStateBg(location);
   const isCoolState = useAppSelector(state => state.application.isCoolBackground);
 
   if (!useStateBg) {
