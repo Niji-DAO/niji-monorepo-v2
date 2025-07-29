@@ -1,4 +1,4 @@
-import Avatar from '@davatar/react';
+import Identicon from '../Identicon';
 import { Trans } from '@lingui/macro';
 import React, { useEffect, useState } from 'react';
 import { useShortAddress } from '../../utils/addressAndENSDisplayUtils';
@@ -87,7 +87,7 @@ const DelegationCandidateInfo: React.FC<DelegationCandidateInfoProps> = props =>
     <div className={classes.wrapper}>
       <div className={classes.delegateCandidateInfoWrapper}>
         <div className={classes.avatarWrapper}>
-          <Avatar address={address} size={45} />
+          <Identicon address={address} size={45} />
         </div>
         <div>
           <div className={classes.ensText}>

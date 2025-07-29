@@ -93,12 +93,39 @@ yarn docker:down
 
 ### Docker Commands
 
-- `yarn docker:start` - 🚀 Build and start all services in one command
+- `yarn docker:start` - 🚀 Build and start all services in one command (rebuilds if code changed)
 - `yarn docker:up` - Start all services in detached mode (must build first)
 - `yarn docker:down` - Stop all services
 - `yarn docker:build` - Build all Docker images (takes 10+ minutes)
 - `yarn docker:logs` - View logs from all services
 - `yarn clean:docker` - Remove all containers and volumes
+
+### Hot Reload Support
+
+The webapp container now supports hot reload for development:
+- Changes in `packages/nouns-webapp/src` are automatically reflected
+- Changes in `packages/nouns-webapp/public` are automatically reflected
+- No need to restart for TypeScript/JavaScript/CSS changes
+- If you modify `package.json` or add new dependencies, run `yarn docker:start` again
+
+### Updating Code Changes
+
+**For webapp source code changes (hot reload enabled):**
+```bash
+# Just save your files - changes auto-refresh!
+# No commands needed for src/ and public/ changes
+```
+
+**For configuration or dependency changes:**
+```bash
+# Rebuild and restart
+yarn docker:start
+```
+
+**Quick restart without rebuild:**
+```bash
+yarn docker:down && yarn docker:up
+```
 
 ## Method 2: NPM Scripts Setup (Recommended for Development)
 

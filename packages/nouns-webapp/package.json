@@ -19,6 +19,8 @@
     "@nouns/assets": "^0.4.2",
     "@nouns/sdk": "^0.4.0",
     "@reduxjs/toolkit": "^1.6.0",
+    "@reown/appkit": "^1.7.17",
+    "@reown/appkit-adapter-wagmi": "^1.7.17",
     "@svgr/webpack": "^8.1.0",
     "@tanstack/react-query": "^5.81.5",
     "@testing-library/jest-dom": "^5.11.4",
@@ -26,6 +28,10 @@
     "@testing-library/user-event": "^12.1.10",
     "@typescript-eslint/eslint-plugin": "^8.35.0",
     "@typescript-eslint/parser": "^8.35.0",
+    "@wagmi/connectors": "^5.9.0",
+    "@wagmi/core": "^2.18.0",
+    "@web3modal/ethereum": "^2.7.1",
+    "@web3modal/wagmi": "^5.1.11",
     "axios": "^0.21.1",
     "bad-words": "^3.0.4",
     "bignumber.js": "^9.0.1",
@@ -77,6 +83,7 @@
     "@types/react-dom": "^18.2.0",
     "@types/react-router-dom": "^5.1.7",
     "@types/react-transition-group": "^4.4.5",
+    "stream-browserify": "^3.0.0",
     "typescript": "^5.0.0"
   },
   "scripts": {

@@ -297,6 +297,10 @@ msgid "Description"
 msgstr "説明"
 
 #: src/components/NavWallet/index.tsx
+msgid "Details"
+msgstr "詳細"
+
+#: src/components/NavWallet/index.tsx
 msgid "Disconnect"
 msgstr "切断する"
 
@@ -774,6 +778,10 @@ msgstr "イーサスキャンで見る"
 #: src/components/VoteModal/index.tsx
 msgid "Vote on Prop {0}"
 msgstr "提案 {0} に投票"
+
+#: src/components/NavWallet/index.tsx
+msgid "Wallet Details"
+msgstr "ウォレットの詳細"
 
 #: src/components/NounProfileVoteRow/index.tsx
 msgid "Voted against"

@@ -1,10 +1,17 @@
-import { mainnet, goerli } from 'wagmi/chains';
+import { mainnet, goerli, hardhat, baseSepolia, base } from 'wagmi/chains';
 import { CHAIN_ID, ETHERSCAN_API_KEY } from '../config';
 
 const getBaseURL = (network: number) => {
   switch (network) {
     case goerli.id:
       return 'https://goerli.etherscan.io/';
+    case hardhat.id:
+      return 'http://localhost:8545/'; // Local network, no explorer
+    case baseSepolia.id:
+      return 'https://sepolia.basescan.org/';
+    case base.id:
+      return 'https://basescan.org/';
+    case mainnet.id:
     default:
       return 'https://etherscan.io/';
   }
@@ -36,6 +43,13 @@ const getApiBaseURL = (network: number) => {
   switch (network) {
     case goerli.id:
       return 'https://api-goerli.etherscan.io/';
+    case hardhat.id:
+      return 'http://localhost:8545/'; // Local network, no API
+    case baseSepolia.id:
+      return 'https://api-sepolia.basescan.org/';
+    case base.id:
+      return 'https://api.basescan.org/';
+    case mainnet.id:
     default:
       return 'https://api.etherscan.io/';
   }
