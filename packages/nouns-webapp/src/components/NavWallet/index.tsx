@@ -1,5 +1,5 @@
 import Davatar from '@davatar/react';
-import { useEthers } from '@usedapp/core';
+import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import React, { useState } from 'react';
 import { useReverseENSLookUp } from '../../utils/ensLookup';
 import { getNavBarButtonVariant, NavBarButtonStyle } from '../NavBarButton';
@@ -12,7 +12,7 @@ import { Dropdown } from 'react-bootstrap';
 import WalletConnectModal from '../WalletConnectModal';
 import { useAppSelector } from '../../hooks';
 import clsx from 'clsx';
-import { useHistory } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { usePickByState } from '../../utils/colorResponsiveUIUtils';
 import WalletConnectButton from './WalletConnectButton';
 import { Trans } from '@lingui/macro';
@@ -49,10 +49,12 @@ const NavWallet: React.FC<NavWalletProps> = props => {
 
   const [buttonUp, setButtonUp] = useState(false);
   const [showConnectModal, setShowConnectModal] = useState(false);
-  const history = useHistory();
-  const { library: provider } = useEthers();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { address: account } = useAccount();
+  const { connectors } = useConnect();
+  const { disconnect } = useDisconnect();
   const activeAccount = useAppSelector(state => state.account.activeAccount);
-  const { deactivate } = useEthers();
   const ens = useReverseENSLookUp(address);
   const shortAddress = useShortAddress(address);
   const activeLocale = useActiveLocale();
@@ -64,7 +66,7 @@ const NavWallet: React.FC<NavWalletProps> = props => {
   const switchWalletHandler = () => {
     setShowConnectModal(false);
     setButtonUp(false);
-    deactivate();
+    disconnect();
     setShowConnectModal(false);
     setShowConnectModal(true);
   };
@@ -72,42 +74,42 @@ const NavWallet: React.FC<NavWalletProps> = props => {
   const disconectWalletHandler = () => {
     setShowConnectModal(false);
     setButtonUp(false);
-    deactivate();
+    disconnect();
   };
 
   const statePrimaryButtonClass = usePickByState(
     navDropdownClasses.whiteInfo,
     navDropdownClasses.coolInfo,
     navDropdownClasses.warmInfo,
-    history,
+    location,
   );
 
   const stateSelectedDropdownClass = usePickByState(
     navDropdownClasses.whiteInfoSelected,
     navDropdownClasses.dropdownActive,
     navDropdownClasses.dropdownActive,
-    history,
+    location,
   );
 
   const mobileTextColor = usePickByState(
     'rgba(140, 141, 146, 1)',
     'rgba(121, 128, 156, 1)',
     'rgba(142, 129, 127, 1)',
-    history,
+    location,
   );
 
   const mobileBorderColor = usePickByState(
     'rgba(140, 141, 146, .5)',
     'rgba(121, 128, 156, .5)',
     'rgba(142, 129, 127, .5)',
-    history,
+    location,
   );
 
   const connectWalletButtonStyle = usePickByState(
     NavBarButtonStyle.WHITE_WALLET,
     NavBarButtonStyle.COOL_WALLET,
     NavBarButtonStyle.WARM_WALLET,
-    history,
+    location,
   );
 
   const customDropdownToggle = React.forwardRef<RefType, Props>(({ onClick, value }, ref) => (
@@ -125,7 +127,7 @@ const NavWallet: React.FC<NavWalletProps> = props => {
         <div className={navDropdownClasses.button}>
           <div className={classes.icon}>
             {' '}
-            <Davatar size={21} address={address} provider={provider} />
+            <Davatar size={21} address={address} />
           </div>
           <div className={navDropdownClasses.dropdownBtnContent}>{ens ? ens : shortAddress}</div>
           <div className={buttonUp ? navDropdownClasses.arrowUp : navDropdownClasses.arrowDown}>
@@ -155,7 +157,7 @@ const NavWallet: React.FC<NavWalletProps> = props => {
                 navDropdownClasses.whiteInfoSelectedTop,
                 navDropdownClasses.coolInfoSelected,
                 navDropdownClasses.warmInfoSelected,
-                history,
+                location,
               ),
             )}
           >
@@ -171,7 +173,7 @@ const NavWallet: React.FC<NavWalletProps> = props => {
                 navDropdownClasses.whiteInfoSelectedBottom,
                 navDropdownClasses.coolInfoSelected,
                 navDropdownClasses.warmInfoSelected,
-                history,
+                location,
               ),
               classes.disconnectText,
             )}
@@ -210,7 +212,7 @@ const NavWallet: React.FC<NavWalletProps> = props => {
             <div className={navDropdownClasses.button}>
               <div className={classes.icon}>
                 {' '}
-                <Davatar size={21} address={address} provider={provider} />
+                <Davatar size={21} address={address} />
               </div>
               <div className={navDropdownClasses.dropdownBtnContent}>
                 {ens ? renderENS(ens) : renderAddress(address)}

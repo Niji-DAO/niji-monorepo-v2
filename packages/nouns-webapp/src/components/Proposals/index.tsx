@@ -2,8 +2,8 @@ import { PartialProposal, ProposalState, useProposalThreshold } from '../../wrap
 import { Alert, Button } from 'react-bootstrap';
 import ProposalStatus from '../ProposalStatus';
 import classes from './Proposals.module.css';
-import { useHistory } from 'react-router-dom';
-import { useBlockNumber, useEthers } from '@usedapp/core';
+import { useNavigate } from 'react-router-dom';
+import { useAccount, useBlockNumber } from 'wagmi';
 import { isMobileScreen } from '../../utils/isMobile';
 import clsx from 'clsx';
 import { useUserVotes } from '../../wrappers/nounToken';
@@ -24,14 +24,14 @@ dayjs.extend(relativeTime);
 
 const getCountdownCopy = (
   proposal: PartialProposal,
-  currentBlock: number,
+  currentBlock: bigint,
   locale: SupportedLocale,
 ) => {
   const timestamp = Date.now();
   const startDate =
     proposal && timestamp && currentBlock
       ? dayjs(timestamp).add(
-          AVERAGE_BLOCK_TIME_IN_SECS * (proposal.startBlock - currentBlock),
+          AVERAGE_BLOCK_TIME_IN_SECS * (proposal.startBlock - Number(currentBlock)),
           'seconds',
         )
       : undefined;
@@ -39,7 +39,7 @@ const getCountdownCopy = (
   const endDate =
     proposal && timestamp && currentBlock
       ? dayjs(timestamp).add(
-          AVERAGE_BLOCK_TIME_IN_SECS * (proposal.endBlock - currentBlock),
+          AVERAGE_BLOCK_TIME_IN_SECS * (proposal.endBlock - Number(currentBlock)),
           'seconds',
         )
       : undefined;
@@ -75,11 +75,11 @@ const getCountdownCopy = (
 };
 
 const Proposals = ({ proposals }: { proposals: PartialProposal[] }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
-  const { account } = useEthers();
+  const { address: account } = useAccount();
   const connectedAccountNounVotes = useUserVotes() || 0;
-  const currentBlock = useBlockNumber();
+  const { data: currentBlock } = useBlockNumber();
   const isMobile = isMobileScreen();
   const activeLocale = useActiveLocale();
   const [showDelegateModal, setShowDelegateModal] = useState(false);
@@ -114,7 +114,7 @@ const Proposals = ({ proposals }: { proposals: PartialProposal[] }) => {
             <div className={classes.submitProposalButtonWrapper}>
               <Button
                 className={classes.generateBtn}
-                onClick={() => history.push('create-proposal')}
+                onClick={() => navigate('create-proposal')}
               >
                 <Trans>Submit Proposal</Trans>
               </Button>
@@ -143,7 +143,7 @@ const Proposals = ({ proposals }: { proposals: PartialProposal[] }) => {
               p.status === ProposalState.ACTIVE ||
               p.status === ProposalState.QUEUED;
 
-            const countDownCopy = getCountdownCopy(p, currentBlock || 0, activeLocale);
+            const countDownCopy = getCountdownCopy(p, currentBlock || BigInt(0), activeLocale);
             if (!countDownCopy) {
               isPropInStateToHaveCountDown = false;
             }

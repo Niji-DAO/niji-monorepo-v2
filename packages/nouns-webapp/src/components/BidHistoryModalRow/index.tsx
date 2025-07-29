@@ -10,7 +10,7 @@ import clsx from 'clsx';
 import auctionActivityClasses from '../AuctionActivity/BidHistory.module.css';
 import _trophy from '../../assets/icons/trophy.svg';
 import Davatar from '@davatar/react';
-import { useEthers } from '@usedapp/core';
+import { usePublicClient } from 'wagmi';
 import { useReverseENSLookUp } from '../../utils/ensLookup';
 import { containsBlockedText } from '../../utils/moderation/containsBlockedText';
 import { i18n } from '@lingui/core';
@@ -23,7 +23,7 @@ interface BidHistoryModalRowProps {
 const BidHistoryModalRow: React.FC<BidHistoryModalRowProps> = props => {
   const { bid, index } = props;
   const txLink = buildEtherscanTxLink(bid.transactionHash);
-  const { library: provider } = useEthers();
+  const provider = usePublicClient();
 
   const bidAmount = <TruncatedAmount amount={new BigNumber(EthersBN.from(bid.value).toString())} />;
 
@@ -37,7 +37,7 @@ const BidHistoryModalRow: React.FC<BidHistoryModalRowProps> = props => {
         <div className={auctionActivityClasses.leftSectionWrapper}>
           <div className={auctionActivityClasses.bidder}>
             <div className={classes.bidderInfoWrapper}>
-              <Davatar size={40} address={bid.sender} provider={provider} />
+              <Davatar size={40} address={bid.sender} />
               <div className={classes.bidderInfoText}>
                 <span>
                   {ens && !ensMatchesBlocklistRegex ? shortENS(ens) : shortAddress}

@@ -17,7 +17,7 @@ const plurals: LocalePlural = {
 };
 
 export async function dynamicActivate(locale: SupportedLocale) {
-  i18n.loadLocaleData(locale, { plurals: () => plurals[locale] });
+  i18n.loadLocaleData(locale, { plurals: plurals[locale] });
   try {
     const catalog = await import(`../locales/${locale}.js`);
     // Bundlers will either export it as default or as a named export named default.
@@ -52,7 +52,7 @@ export function NounsI18nProvider({
   // This renders the translation _keys_, not the translation _messages_, which is only acceptable while loading the DEFAULT_LOCALE,
   // as [there are no "default" messages](https://github.com/lingui/js-lingui/issues/388#issuecomment-497779030).
   // See https://github.com/lingui/js-lingui/issues/1194#issuecomment-1068488619.
-  i18n.loadLocaleData(DEFAULT_LOCALE, { plurals: () => plurals[DEFAULT_LOCALE] });
+  i18n.loadLocaleData(DEFAULT_LOCALE, { plurals: plurals[DEFAULT_LOCALE] });
   i18n.load(DEFAULT_LOCALE, {});
   i18n.activate(DEFAULT_LOCALE);
 

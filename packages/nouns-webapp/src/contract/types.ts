@@ -37,7 +37,7 @@ export interface Contracts {
 export enum ChainId {
   Mainnet = 1,
   Ropsten = 3,
-  Rinkeby = 4,
+  
   Kovan = 42,
   Local = 31337,
   Base = 8453,

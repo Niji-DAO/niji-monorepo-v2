@@ -2,16 +2,16 @@
 <svg width="256px" height="301px" viewBox="0 0 256 301" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid">
     <defs>
         <linearGradient x1="0%" y1="50.017894%" x2="100.096998%" y2="50.017894%" id="linearGradient-1">
-            <stop stop-color="#FFFFFF" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.9576" offset="14.13%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.7" offset="100%"></stop>
+            <stop stopColor="#FFFFFF" offset="0%"></stop>
+            <stop stopColor="#FFFFFF" stopOpacity="0.9576" offset="14.13%"></stop>
+            <stop stopColor="#FFFFFF" stopOpacity="0.7" offset="100%"></stop>
         </linearGradient>
         <linearGradient x1="-0.0390588235%" y1="49.9824538%" x2="100%" y2="49.9824538%" id="linearGradient-2">
-            <stop stop-color="#F1F1F2" offset="0%"></stop>
-            <stop stop-color="#E4E5E6" offset="9.191442%"></stop>
-            <stop stop-color="#D9DADB" offset="23.57%"></stop>
-            <stop stop-color="#D2D4D5" offset="43.8%"></stop>
-            <stop stop-color="#D0D2D3" offset="100%"></stop>
+            <stop stopColor="#F1F1F2" offset="0%"></stop>
+            <stop stopColor="#E4E5E6" offset="9.191442%"></stop>
+            <stop stopColor="#D9DADB" offset="23.57%"></stop>
+            <stop stopColor="#D2D4D5" offset="43.8%"></stop>
+            <stop stopColor="#D0D2D3" offset="100%"></stop>
         </linearGradient>
     </defs>
 	<g>

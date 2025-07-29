@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { ChainId, useEthers } from '@usedapp/core';
+import { useAccount } from 'wagmi';
 import { useAppDispatch, useAppSelector } from './hooks';
 import { setActiveAccount } from './state/slices/account';
-import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { setAlertModal } from './state/slices/application';
 import classes from './App.module.css';
 import '../src/css/globals.css';
@@ -19,26 +19,26 @@ import NotFoundPage from './pages/NotFound';
 import Playground from './pages/Playground';
 import { CHAIN_ID } from './config';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { AvatarProvider } from '@davatar/react';
+
 import dayjs from 'dayjs';
 import DelegatePage from './pages/DelegatePage';
 
 function App() {
-  const { account, chainId, library, isLoading } = useEthers();
+  const { address, chainId, isConnecting, isReconnecting } = useAccount();
   const [cachedChainId, setCachedChainId] = useState(chainId);
   const dispatch = useAppDispatch();
   dayjs.extend(relativeTime);
 
   useEffect(() => {
     // Local account array updated
-    dispatch(setActiveAccount(account));
-  }, [account, dispatch]);
+    dispatch(setActiveAccount(address));
+  }, [address, dispatch]);
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isConnecting && !isReconnecting) {
       setCachedChainId(chainId);
     }
-  }, [chainId, isLoading]);
+  }, [chainId, isConnecting, isReconnecting]);
 
   const alertModal = useAppSelector(state => state.application.alertModal);
 
@@ -52,30 +52,22 @@ function App() {
           onDismiss={() => dispatch(setAlertModal({ ...alertModal, show: false }))}
         />
       )}
-      <BrowserRouter>
-        <AvatarProvider
-          provider={chainId === ChainId.Mainnet ? (library as any) : undefined}
-          batchLookups={true}
-        >
-          <NavBar />
-          <Switch>
-            <Route exact path="/" component={AuctionPage} />
-            <Redirect from="/auction/:id" to="/noun/:id" />
-            <Route
-              exact
-              path="/noun/:id"
-              render={props => <AuctionPage initialAuctionId={Number(props.match.params.id)} />}
-            />
-            <Route exact path="/create-proposal" component={CreateProposalPage} />
-            <Route exact path="/vote" component={GovernancePage} />
-            <Route exact path="/vote/:id" component={VotePage} />
-            <Route exact path="/playground" component={Playground} />
-            <Route exact path="/delegate" component={DelegatePage} />
-            <Route component={NotFoundPage} />
-          </Switch>
-          <Footer />
-        </AvatarProvider>
-      </BrowserRouter>
+      <NavBar />
+      <Routes>
+        <Route path="/" element={<AuctionPage />} />
+        <Route path="/auction/:id" element={<Navigate to="/noun/:id" replace />} />
+        <Route
+          path="/noun/:id"
+          element={<AuctionPage />}
+        />
+        <Route path="/create-proposal" element={<CreateProposalPage />} />
+        <Route path="/vote" element={<GovernancePage />} />
+        <Route path="/vote/:id" element={<VotePage />} />
+        <Route path="/playground" element={<Playground />} />
+        <Route path="/delegate" element={<DelegatePage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+      <Footer />
     </div>
   );
 }

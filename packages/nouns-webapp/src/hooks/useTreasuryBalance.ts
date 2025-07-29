@@ -1,9 +1,11 @@
-import { useEtherBalance } from '@usedapp/core';
+import { useBalance, useReadContract } from 'wagmi';
+import { useConfig } from 'wagmi';
+import { useEffect, useState } from 'react';
 import useLidoBalance from './useLidoBalance';
 import useTokenBuyerBalance from './useTokenBuyerBalance';
-import { useCoingeckoPrice } from '@usedapp/coingecko';
 import config from '../config';
 import { BigNumber, ethers } from 'ethers';
+import { chainlinkAggregatorV3InterfaceABI } from '../abis/chainlinkAggregatorV3Interface';
 
 /**
  * Computes treasury balance (ETH + Lido)
@@ -11,12 +13,21 @@ import { BigNumber, ethers } from 'ethers';
  * @returns Total balance of treasury (ETH + Lido) as EthersBN
  */
 export const useTreasuryBalance = () => {
-  const ethBalance = useEtherBalance(config.addresses.nounsDaoExecutor);
+  const { data: ethBalance } = useBalance({ address: config.addresses.nounsDaoExecutor as `0x${string}` });
   const lidoBalanceAsETH = useLidoBalance();
   const tokenBuyerBalanceAsETH = useTokenBuyerBalance();
 
   const zero = BigNumber.from(0);
-  return ethBalance?.add(lidoBalanceAsETH ?? zero).add(tokenBuyerBalanceAsETH ?? zero) ?? zero;
+  return ethBalance?.value ? BigNumber.from(ethBalance.value).add(lidoBalanceAsETH ?? zero).add(tokenBuyerBalanceAsETH ?? zero) : zero;
+};
+
+export const useEthUsdPrice = () => {
+  const { data: price } = useReadContract({
+    address: config.addresses.chainlinkEthUsdc as `0x${string}`,
+    abi: chainlinkAggregatorV3InterfaceABI,
+    functionName: 'latestRoundData',
+  });
+  return price;
 };
 
 /**
@@ -25,7 +36,8 @@ export const useTreasuryBalance = () => {
  * @returns USD value of treasury assets (ETH + Lido) at current exchange rate
  */
 export const useTreasuryUSDValue = () => {
-  const etherPrice = Number(useCoingeckoPrice('ethereum', 'usd'));
+  const priceData = useEthUsdPrice();
+  const etherPrice = priceData ? Number(priceData[1]) / 1e8 : 0;
   const treasuryBalanceETH = Number(
     ethers.utils.formatEther(useTreasuryBalance()?.toString() || '0'),
   );

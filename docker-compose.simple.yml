@@ -1,0 +1,39 @@
+services:
+  # Local Hardhat Node
+  hardhat:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./packages/nouns-contracts:/app
+      - /app/node_modules
+    ports:
+      - "8545:8545"
+    environment:
+      - INFURA_PROJECT_ID=test
+      - ETHERSCAN_API_KEY=test
+      - MNEMONIC=test test test test test test test test test test test junk
+    command: sh -c "apk add --no-cache git python3 make g++ && yarn install --ignore-scripts && npx hardhat compile && npx hardhat node --hostname 0.0.0.0"
+    networks:
+      - nouns-network
+
+  # Nouns WebApp (Dev Server)
+  webapp:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./packages/nouns-webapp:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_CHAIN_ID=31337
+      - REACT_APP_INFURA_PROJECT_ID=56b9a8fd14c84c3c89927faf6ae130a8
+    command: sh -c "apk add --no-cache git && yarn install && yarn start"
+    depends_on:
+      - hardhat
+    networks:
+      - nouns-network
+
+networks:
+  nouns-network:
+    driver: bridge

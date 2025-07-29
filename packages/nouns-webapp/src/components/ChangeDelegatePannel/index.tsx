@@ -1,5 +1,6 @@
+import { getEnsAddress } from '@wagmi/core';
 import { Trans } from '@lingui/macro';
-import { useEthers } from '@usedapp/core';
+import { useAccount, useConfig } from 'wagmi';
 import clsx from 'clsx';
 import { isAddress } from 'ethers/lib/utils';
 import React, { useEffect, useState } from 'react';
@@ -50,34 +51,35 @@ const ChangeDelegatePannel: React.FC<ChangeDelegatePannelProps> = props => {
     ChangeDelegateState.ENTER_DELEGATE_ADDRESS,
   );
 
-  const { library, account } = useEthers();
+  const config = useConfig();
+  const { address: account } = useAccount();
 
   const [delegateAddress, setDelegateAddress] = useState(delegateTo ?? '');
   const [delegateInputText, setDelegateInputText] = useState(delegateTo ?? '');
   const [delegateInputClass, setDelegateInputClass] = useState<string>('');
   const [hasResolvedDeepLinkedENS, setHasResolvedDeepLinkedENS] = useState(false);
   const availableVotes = useNounTokenBalance(account ?? '') ?? 0;
-  const { send: delegateVotes, state: delegateState } = useDelegateVotes();
+  const { send: delegateVotes, data: delegateData, error: delegateError } = useDelegateVotes();
   const locale = useActiveLocale();
   const currentDelegate = useUserDelegatee();
 
   useEffect(() => {
-    if (delegateState.status === 'Success') {
+    if (delegateData) {
       setChangeDelegateState(ChangeDelegateState.CHANGE_SUCCESS);
     }
 
-    if (delegateState.status === 'Exception' || delegateState.status === 'Fail') {
+    if (delegateError) {
       setChangeDelegateState(ChangeDelegateState.CHANGE_FAILURE);
     }
 
-    if (delegateState.status === 'Mining') {
+    if (delegateData === undefined && delegateError === undefined) {
       setChangeDelegateState(ChangeDelegateState.CHANGING);
     }
-  }, [delegateState]);
+  }, [delegateData, delegateError]);
 
   useEffect(() => {
     const checkIsValidENS = async () => {
-      const reverseENSResult = await library?.resolveName(delegateAddress);
+      const reverseENSResult = await getEnsAddress(config, { name: delegateAddress });
       if (reverseENSResult) {
         setDelegateAddress(reverseENSResult);
       }
@@ -85,7 +87,7 @@ const ChangeDelegatePannel: React.FC<ChangeDelegatePannelProps> = props => {
     };
 
     checkIsValidENS();
-  }, [delegateAddress, delegateTo, library]);
+  }, [delegateAddress, delegateTo]);
 
   useEffect(() => {
     if (delegateAddress.length === 0) {
@@ -99,7 +101,7 @@ const ChangeDelegatePannel: React.FC<ChangeDelegatePannelProps> = props => {
     }
   }, [delegateAddress, delegateTo, hasResolvedDeepLinkedENS]);
 
-  const etherscanTxLink = buildEtherscanTxLink(delegateState.transaction?.hash ?? '');
+  const etherscanTxLink = buildEtherscanTxLink(delegateData ?? '');
 
   const primaryButton = usePickByState(
     changeDelegateState,
@@ -182,7 +184,7 @@ const ChangeDelegatePannel: React.FC<ChangeDelegatePannelProps> = props => {
         Your <span style={{ fontWeight: 'bold' }}>{availableVotes}</span> votes have been delegated
         to a new account.
       </Trans>,
-      <>{delegateState.errorMessage}</>,
+      <>{delegateError?.message}</>,
     ],
   );
 

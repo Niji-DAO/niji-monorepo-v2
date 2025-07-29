@@ -1,4 +1,4 @@
-import { useBlockNumber } from '@usedapp/core';
+import { useBlockNumber } from 'wagmi';
 import { useEffect, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '../../hooks';
 import { useReadonlyProvider } from '../../hooks/useReadonlyProvider';
@@ -12,10 +12,10 @@ const Updater = (): null => {
   const state = useAppSelector(state => state.logs);
   const provider = useReadonlyProvider();
 
-  const blockNumber = useBlockNumber();
+  const { data: blockNumber } = useBlockNumber();
 
   const filtersNeedFetch: EventFilter[] = useMemo(() => {
-    if (typeof blockNumber !== 'number') return [];
+    if (typeof blockNumber !== 'bigint') return [];
 
     return Object.keys(state)
       .filter(key => {
@@ -35,9 +35,9 @@ const Updater = (): null => {
   }, [blockNumber, state]);
 
   useEffect(() => {
-    if (!provider || typeof blockNumber !== 'number' || filtersNeedFetch.length === 0) return;
+    if (!provider || typeof blockNumber !== 'bigint' || filtersNeedFetch.length === 0) return;
 
-    dispatch(fetchingLogs({ filters: filtersNeedFetch, blockNumber }));
+    dispatch(fetchingLogs({ filters: filtersNeedFetch, blockNumber: Number(blockNumber) }));
     filtersNeedFetch.forEach(filter => {
       const ranges: { fromBlock: number; toBlock: number }[] = [];
 
@@ -45,7 +45,7 @@ const Updater = (): null => {
       while (fromBlock <= blockNumber) {
         ranges.push({
           fromBlock: fromBlock,
-          toBlock: Math.min(fromBlock + MAX_BLOCKS_PER_CALL, blockNumber),
+          toBlock: Math.min(fromBlock + MAX_BLOCKS_PER_CALL, Number(blockNumber)),
         });
         fromBlock += MAX_BLOCKS_PER_CALL;
       }
@@ -53,8 +53,9 @@ const Updater = (): null => {
       Promise.all(
         ranges.map(range =>
           provider.getLogs({
-            ...filter,
-            ...range,
+            address: filter.address ? filter.address as `0x${string}` : undefined,
+            fromBlock: BigInt(range.fromBlock),
+            toBlock: BigInt(range.toBlock),
           }),
         ),
       )
@@ -62,7 +63,7 @@ const Updater = (): null => {
           dispatch(
             fetchedLogs({
               filter,
-              results: { logs: logs.flat(), blockNumber },
+              results: { logs: logs.flat(), blockNumber: Number(blockNumber) },
             }),
           );
         })
@@ -71,7 +72,7 @@ const Updater = (): null => {
           dispatch(
             fetchedLogsError({
               filter,
-              blockNumber,
+              blockNumber: Number(blockNumber),
             }),
           );
         });

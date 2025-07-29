@@ -10,3 +10,4 @@ dist
 *.tsbuildinfo
 *.log
 .history/
+ISSUE.md

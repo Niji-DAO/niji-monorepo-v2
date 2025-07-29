@@ -1,58 +1,27 @@
-import Davatar, { Image } from '@davatar/react';
-import { BaseProvider } from '@ethersproject/providers';
-import { Component } from 'react';
+import React, { useEffect, useRef } from 'react';
+import jazzicon from 'jazzicon';
 
-interface IdenticonInnerProps {
+interface IdenticonProps {
   address: string;
-  provider: BaseProvider;
   size: number;
 }
 
-interface IdenticonOutterProps {
-  address: string;
-  provider?: BaseProvider;
-  size?: number;
-}
+const Identicon: React.FC<IdenticonProps> = ({ address, size }) => {
+  const ref = useRef<HTMLDivElement>(null);
 
-class IdenticonInner extends Component<IdenticonInnerProps> {
-  state: { fallback: boolean } = { fallback: false };
+  useEffect(() => {
+    if (address && ref.current) {
+      const diameter = size;
+      const seed = parseInt(address.slice(2, 10), 16);
+      const icon = jazzicon(diameter, seed);
+      if (ref.current.firstChild) {
+        ref.current.removeChild(ref.current.firstChild);
+      }
+      ref.current.appendChild(icon);
+    }
+  }, [address, size]);
 
-  static getDerivedStateFromError() {
-    // use Jazzicon if Davatar throws;
-    return { fallback: true };
-  }
-
-  componentDidCatch(error: any, errorInfo: any) {
-    console.log(error, errorInfo);
-  }
-
-  renderDavatar(address: string, provider: BaseProvider, size: number) {
-    return <Davatar address={address} size={size} provider={provider} />;
-  }
-
-  renderJazzicon(address: string, size: number) {
-    return <Image address={address} size={size} />;
-  }
-
-  render() {
-    return (
-      <>
-        {this.state.fallback
-          ? this.renderJazzicon(this.props.address, this.props.size)
-          : this.renderDavatar(this.props.address, this.props.provider, this.props.size)}
-      </>
-    );
-  }
-}
-
-const Identicon: React.FC<IdenticonOutterProps> = props => {
-  const { size, address, provider } = props;
-
-  if (!provider) {
-    return <></>;
-  }
-
-  return <IdenticonInner size={size ?? 24} address={address} provider={provider} />;
+  return <div ref={ref} style={{ width: size, height: size }} />;
 };
 
 export default Identicon;

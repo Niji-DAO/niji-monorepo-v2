@@ -1,6 +1,6 @@
 import { useReverseENSLookUp } from '../../utils/ensLookup';
 import { resolveNounContractAddress } from '../../utils/resolveNounsContractAddress';
-import { useEthers } from '@usedapp/core';
+import { usePublicClient } from 'wagmi';
 import classes from './ShortAddress.module.css';
 import { containsBlockedText } from '../../utils/moderation/containsBlockedText';
 import { useShortAddress } from '../../utils/addressAndENSDisplayUtils';
@@ -9,7 +9,7 @@ import Identicon from '../Identicon';
 
 const ShortAddress: React.FC<{ address: string; avatar?: boolean; size?: number }> = props => {
   const { address, avatar, size = 24 } = props;
-  const { library: provider } = useEthers();
+  const provider = usePublicClient();
 
   const ens = useReverseENSLookUp(address) || resolveNounContractAddress(address);
   const ensMatchesBlocklistRegex = containsBlockedText(ens || '', 'en');
@@ -20,7 +20,7 @@ const ShortAddress: React.FC<{ address: string; avatar?: boolean; size?: number 
       <div className={classes.shortAddress}>
         {avatar && (
           <div key={address}>
-            <Identicon size={size} address={address} provider={provider} />
+            <Identicon size={size} address={address} />
           </div>
         )}
         <span>{ens && !ensMatchesBlocklistRegex ? ens : shortAddress}</span>

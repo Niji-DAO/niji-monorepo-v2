@@ -1,6 +1,6 @@
-import { useContractCall, useContractFunction, useEthers } from '@usedapp/core';
+import { useAccount, useReadContract, useWriteContract } from 'wagmi';
 import { BigNumber as EthersBN, ethers, utils } from 'ethers';
-import { NounsTokenABI, NounsTokenFactory } from '@nouns/contracts';
+import { NounsTokenABI } from '@nouns/contracts';
 import config, { cache, cacheKey, CHAIN_ID } from '../config';
 import { useQuery } from '@apollo/client';
 import { seedsQuery } from './subgraph';
@@ -31,7 +31,7 @@ export enum NounsTokenContractFunction {
   delegateVotes = 'votesToDelegate',
 }
 
-const abi = new utils.Interface(NounsTokenABI);
+const abi = NounsTokenABI;
 const seedCacheKey = cacheKey(cache.seed, CHAIN_ID, config.addresses.nounsToken);
 
 const isSeedValid = (seed: Record<string, any> | undefined) => {
@@ -55,19 +55,18 @@ const isSeedValid = (seed: Record<string, any> | undefined) => {
 };
 
 export const useNounToken = (nounId: EthersBN) => {
-  const [noun] =
-    useContractCall<[string]>({
-      abi,
-      address: config.addresses.nounsToken,
-      method: 'dataURI',
-      args: [nounId],
-    }) || [];
+  const { data: noun } = useReadContract({
+    abi,
+    address: config.addresses.nounsToken as `0x${string}`,
+    functionName: 'dataURI',
+    args: [nounId],
+  });
 
   if (!noun) {
     return;
   }
 
-  const nounImgData = noun.split(';base64,').pop() as string;
+  const nounImgData = (noun as string).split(';base64,').pop() as string;
   const json: NounToken = JSON.parse(atob(nounImgData));
 
   return json;
@@ -112,121 +111,122 @@ const useNounSeeds = () => {
 export const useNounSeed = (nounId: EthersBN): INounSeed => {
   const seeds = useNounSeeds();
   const seed = seeds?.[nounId.toString()];
-  // prettier-ignore
-  const request = seed ? false : {
+  const { data: response } = useReadContract({
     abi,
-    address: config.addresses.nounsToken,
-    method: 'seeds',
+    address: config.addresses.nounsToken as `0x${string}`,
+    functionName: 'seeds',
     args: [nounId],
-  };
-  const response = useContractCall<INounSeed>(request);
+    query: { enabled: !seed },
+  });
+
   if (response) {
     const seedCache = localStorage.getItem(seedCacheKey);
     if (seedCache && isSeedValid(response)) {
       const updatedSeedCache = JSON.stringify({
         ...JSON.parse(seedCache),
         [nounId.toString()]: {
-          background: response.background,
-          backDecoration: response.backDecoration,
-          backgroundDecoration: response.backgroundDecoration,
-          special: response.special,
-          leftHand: response.leftHand,
-          back: response.back,
-          clothe: response.clothe,
-          choker: response.choker,
-          ear: response.ear,
-          hair: response.hair,
-          headphone: response.headphone,
-          hat: response.hat,
+          background: (response as any).background,
+          backDecoration: (response as any).backDecoration,
+          backgroundDecoration: (response as any).backgroundDecoration,
+          special: (response as any).special,
+          leftHand: (response as any).leftHand,
+          back: (response as any).back,
+          clothe: (response as any).clothe,
+          choker: (response as any).choker,
+          ear: (response as any).ear,
+          hair: (response as any).hair,
+          headphone: (response as any).headphone,
+          hat: (response as any).hat,
         },
       });
       localStorage.setItem(seedCacheKey, updatedSeedCache);
     }
-    return response;
+    return response as INounSeed;
   }
   return seed;
 };
 
 export const useUserVotes = (): number | undefined => {
-  const { account } = useEthers();
-  return useAccountVotes(account ?? ethers.constants.AddressZero);
+  const { address } = useAccount();
+  return useAccountVotes(address ?? ethers.constants.AddressZero);
 };
 
 export const useAccountVotes = (account?: string): number | undefined => {
-  const [votes] =
-    useContractCall<[EthersBN]>({
-      abi,
-      address: config.addresses.nounsToken,
-      method: 'getCurrentVotes',
-      args: [account],
-    }) || [];
-  return votes?.toNumber();
+  const { data: votes } = useReadContract({
+    abi,
+    address: config.addresses.nounsToken as `0x${string}`,
+    functionName: 'getCurrentVotes',
+    args: [account],
+  });
+  return votes ? Number(votes) : undefined;
 };
 
 export const useUserDelegatee = (): string | undefined => {
-  const { account } = useEthers();
-  const [delegate] =
-    useContractCall<[string]>({
-      abi,
-      address: config.addresses.nounsToken,
-      method: 'delegates',
-      args: [account],
-    }) || [];
-  return delegate;
+  const { address } = useAccount();
+  const { data: delegate } = useReadContract({
+    abi,
+    address: config.addresses.nounsToken as `0x${string}`,
+    functionName: 'delegates',
+    args: [address],
+  });
+  return delegate as string | undefined;
 };
 
 export const useUserVotesAsOfBlock = (block: number | undefined): number | undefined => {
-  const { account } = useEthers();
-  // Check for available votes
-  const [votes] =
-    useContractCall<[EthersBN]>({
-      abi,
-      address: config.addresses.nounsToken,
-      method: 'getPriorVotes',
-      args: [account, block],
-    }) || [];
-  return votes?.toNumber();
+  const { address } = useAccount();
+  const { data: votes } = useReadContract({
+    abi,
+    address: config.addresses.nounsToken as `0x${string}`,
+    functionName: 'getPriorVotes',
+    args: [address, block],
+    query: { enabled: !!block },
+  });
+  return votes ? Number(votes) : undefined;
 };
 
 export const useDelegateVotes = () => {
-  const nounsToken = new NounsTokenFactory().attach(config.addresses.nounsToken);
+  const { writeContract, data, error } = useWriteContract();
 
-  const { send, state } = useContractFunction(nounsToken as any, 'delegate');
+  const send = (delegatee: string) => {
+    writeContract({
+      address: config.addresses.nounsToken as `0x${string}`,
+      abi,
+      functionName: 'delegate',
+      args: [delegatee],
+    });
+  };
 
-  return { send, state };
+  return { send, data, error };
 };
 
 export const useNounTokenBalance = (address: string): number | undefined => {
-  const [tokenBalance] =
-    useContractCall<[EthersBN]>({
-      abi,
-      address: config.addresses.nounsToken,
-      method: 'balanceOf',
-      args: [address],
-    }) || [];
-  return tokenBalance?.toNumber();
+  const { data: tokenBalance } = useReadContract({
+    abi,
+    address: config.addresses.nounsToken as `0x${string}`,
+    functionName: 'balanceOf',
+    args: [address],
+  });
+  return tokenBalance ? Number(tokenBalance) : undefined;
 };
 
 export const useUserNounTokenBalance = (): number | undefined => {
-  const { account } = useEthers();
+  const { address } = useAccount();
 
-  const [tokenBalance] =
-    useContractCall<[EthersBN]>({
-      abi,
-      address: config.addresses.nounsToken,
-      method: 'balanceOf',
-      args: [account],
-    }) || [];
-  return tokenBalance?.toNumber();
+  const { data: tokenBalance } = useReadContract({
+    abi,
+    address: config.addresses.nounsToken as `0x${string}`,
+    functionName: 'balanceOf',
+    args: [address],
+  });
+  return tokenBalance ? Number(tokenBalance) : undefined;
 };
 
 export const useNoundersDAO = (): string | undefined => {
-  const [noundersDAO] =
-    useContractCall<[EthersBN]>({
-      abi,
-      address: config.addresses.nounsToken,
-      method: 'noundersDAO',
-      args: [],
-    }) || [];
+  const { data: noundersDAO } = useReadContract({
+    abi,
+    address: config.addresses.nounsToken as `0x${string}`,
+    functionName: 'noundersDAO',
+    args: [],
+  });
   return noundersDAO?.toString();
 };

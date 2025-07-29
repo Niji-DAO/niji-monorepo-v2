@@ -10,8 +10,10 @@ import {
 } from '../../wrappers/nounsDao';
 import { useUserVotesAsOfBlock } from '../../wrappers/nounToken';
 import classes from './Vote.module.css';
-import { RouteComponentProps } from 'react-router-dom';
-import { TransactionStatus, useBlockNumber, useEthers } from '@usedapp/core';
+import { useParams } from 'react-router-dom';
+import { NounsDAOV2ABI } from '@nouns/sdk';
+import config from '../../config';
+import { useAccount, useBlockNumber } from 'wagmi';
 import { AlertModal, setAlertModal } from '../../state/slices/application';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -41,19 +43,15 @@ import { AVERAGE_BLOCK_TIME_IN_SECS } from '../../utils/constants';
 import { SearchIcon } from '@heroicons/react/solid';
 import ReactTooltip from 'react-tooltip';
 import DynamicQuorumInfoModal from '../../components/DynamicQuorumInfoModal';
-import config from '../../config';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(advanced);
 
-const VotePage = ({
-  match: {
-    params: { id },
-  },
-}: RouteComponentProps<{ id: string }>) => {
-  const proposal = useProposal(id);
-  const { account } = useEthers();
+const VotePage = () => {
+  const { id } = useParams<{ id: string }>();
+  const proposal = useProposal(id || '0');
+  const { address: account } = useAccount();
 
   const [showVoteModal, setShowVoteModal] = useState<boolean>(false);
   const [showDynamicQuorumInfoModal, setShowDynamicQuorumInfoModal] = useState<boolean>(false);
@@ -78,11 +76,11 @@ const VotePage = ({
 
   // Get and format date from data
   const timestamp = Date.now();
-  const currentBlock = useBlockNumber();
+  const { data: currentBlock } = useBlockNumber();
   const startDate =
     proposal && timestamp && currentBlock
       ? dayjs(timestamp).add(
-          AVERAGE_BLOCK_TIME_IN_SECS * (proposal.startBlock - currentBlock),
+          AVERAGE_BLOCK_TIME_IN_SECS * (proposal.startBlock - Number(currentBlock)),
           'seconds',
         )
       : undefined;
@@ -90,7 +88,7 @@ const VotePage = ({
   const endDate =
     proposal && timestamp && currentBlock
       ? dayjs(timestamp).add(
-          AVERAGE_BLOCK_TIME_IN_SECS * (proposal.endBlock - currentBlock),
+          AVERAGE_BLOCK_TIME_IN_SECS * (proposal.endBlock - Number(currentBlock)),
           'seconds',
         )
       : undefined;
@@ -161,13 +159,23 @@ const VotePage = ({
     if (hasSucceeded) {
       return () => {
         if (proposal?.id) {
-          return queueProposal(proposal.id);
+          return queueProposal({
+            address: config.addresses.nounsDAOProxy as `0x${string}`,
+            abi: NounsDAOV2ABI,
+            functionName: 'queue',
+            args: [proposal.id],
+          });
         }
       };
     }
     return () => {
       if (proposal?.id) {
-        return executeProposal(proposal.id);
+        return executeProposal({
+          address: config.addresses.nounsDAOProxy as `0x${string}`,
+          abi: NounsDAOV2ABI,
+          functionName: 'execute',
+          args: [proposal.id],
+        });
       }
     };
   })();
@@ -176,7 +184,12 @@ const VotePage = ({
     if (isCancellable) {
       return () => {
         if (proposal?.id) {
-          return cancelProposal(proposal.id);
+          return cancelProposal({
+            address: config.addresses.nounsDAOProxy as `0x${string}`,
+            abi: NounsDAOV2ABI,
+            functionName: 'cancel',
+            args: [proposal.id],
+          });
         }
       };
     }
@@ -184,20 +197,20 @@ const VotePage = ({
 
   const onTransactionStateChange = useCallback(
     (
-      tx: TransactionStatus,
+      tx: any,
       successMessage?: ReactNode,
       setPending?: (isPending: boolean) => void,
       getErrorMessage?: (error?: string) => ReactNode | undefined,
       onFinalState?: () => void,
     ) => {
       switch (tx.status) {
-        case 'None':
+        case 'idle':
           setPending?.(false);
           break;
-        case 'Mining':
+        case 'pending':
           setPending?.(true);
           break;
-        case 'Success':
+        case 'success':
           setModal({
             title: <Trans>Success</Trans>,
             message: successMessage || <Trans>Transaction Successful!</Trans>,
@@ -206,19 +219,10 @@ const VotePage = ({
           setPending?.(false);
           onFinalState?.();
           break;
-        case 'Fail':
+        case 'error':
           setModal({
             title: <Trans>Transaction Failed</Trans>,
-            message: tx?.errorMessage || <Trans>Please try again.</Trans>,
-            show: true,
-          });
-          setPending?.(false);
-          onFinalState?.();
-          break;
-        case 'Exception':
-          setModal({
-            title: <Trans>Error</Trans>,
-            message: getErrorMessage?.(tx?.errorMessage) || <Trans>Please try again.</Trans>,
+            message: tx?.error?.message || <Trans>Please try again.</Trans>,
             show: true,
           });
           setPending?.(false);

@@ -1,20 +1,18 @@
 import { ApolloProvider, useQuery } from '@apollo/client';
-import { Web3Provider, WebSocketProvider } from '@ethersproject/providers';
+import { WebSocketProvider } from '@ethersproject/providers';
 import { NounsAuctionHouseFactory } from '@nouns/sdk';
-import { ChainId, DAppProvider, DEFAULT_SUPPORTED_CHAINS } from '@usedapp/core';
-import { Web3ReactProvider } from '@web3-react/core';
-import { ConnectedRouter, connectRouter, push, routerMiddleware } from 'connected-react-router';
-import dotenv from 'dotenv';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BigNumber, BigNumberish } from 'ethers';
-import { createBrowserHistory, History } from 'history';
+
 import React, { useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { applyMiddleware, combineReducers, createStore, PreloadedState } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
+import { WagmiProvider, createConfig, http } from 'wagmi';
+import { mainnet, goerli, hardhat, baseSepolia } from 'wagmi/chains';
 import App from './App';
-import { BaseSepoliaChain } from './chain';
-import config, { CHAIN_ID, createNetworkHttpUrl, multicallOnLocalhost } from './config';
+import config from './config';
 import { useAppDispatch, useAppSelector } from './hooks';
 import { LanguageProvider } from './i18n/LanguageProvider';
 import './index.css';
@@ -40,14 +38,12 @@ import pastAuctions, { addPastAuctions } from './state/slices/pastAuctions';
 import LogsUpdater from './state/updaters/logs';
 import { nounPath } from './utils/history';
 import { clientFactory, latestAuctionsQuery } from './wrappers/subgraph';
+import { BrowserRouter, useNavigate } from 'react-router-dom';
 
-dotenv.config();
 
-export const history = createBrowserHistory();
 
-const createRootReducer = (history: History) =>
+const createRootReducer = () =>
   combineReducers({
-    router: connectRouter(history),
     account,
     application,
     auction,
@@ -58,11 +54,10 @@ const createRootReducer = (history: History) =>
 
 export default function configureStore(preloadedState: PreloadedState<any>) {
   const store = createStore(
-    createRootReducer(history), // root reducer with router state
+    createRootReducer(), // root reducer with router state
     preloadedState,
     composeWithDevTools(
       applyMiddleware(
-        routerMiddleware(history), // for dispatching history actions
         // ... other middlewares ...
       ),
     ),
@@ -76,27 +71,19 @@ const store = configureStore({});
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
-const supportedChainURLs = {
-  [ChainId.Mainnet]: createNetworkHttpUrl('mainnet'),
-  [ChainId.Rinkeby]: createNetworkHttpUrl('rinkeby'),
-  [ChainId.Hardhat]: 'http://localhost:8545',
-  [ChainId.Goerli]: createNetworkHttpUrl('goerli'),
-  [BaseSepoliaChain.chainId]: createNetworkHttpUrl('base-sepolia'),
-};
-
-// prettier-ignore
-const useDappConfig = {
-  readOnlyChainId: CHAIN_ID,
-  readOnlyUrls: {
-    [CHAIN_ID]: supportedChainURLs[CHAIN_ID],
+const wagmiConfig = createConfig({
+  chains: [mainnet, goerli, hardhat, baseSepolia],
+  transports: {
+    [mainnet.id]: http(),
+    [goerli.id]: http(),
+    [hardhat.id]: http(),
+    [baseSepolia.id]: http(),
   },
-  multicallAddresses: {
-    [ChainId.Hardhat]: multicallOnLocalhost,
-  },
-  networks: [...DEFAULT_SUPPORTED_CHAINS, BaseSepoliaChain],
-};
+});
 
-const client = clientFactory(config.app.subgraphApiUri);
+const queryClient = new QueryClient();
+
+const client = clientFactory(config.app?.subgraphApiUri || 'https://api.thegraph.com/subgraphs/name/cnnouns/cnnouns-subgraph');
 
 const Updaters = () => {
   return (
@@ -110,6 +97,7 @@ const BLOCKS_PER_DAY = 7_200;
 
 const ChainSubscriber: React.FC = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const loadState = async () => {
     const wsProvider = new WebSocketProvider(config.app.wsRpcUri);
@@ -144,7 +132,7 @@ const ChainSubscriber: React.FC = () => {
         setActiveAuction(reduxSafeNewAuction({ nounId, startTime, endTime, settled: false })),
       );
       const nounIdNumber = BigNumber.from(nounId).toNumber();
-      dispatch(push(nounPath(nounIdNumber)));
+      navigate(nounPath(nounIdNumber));
       dispatch(setOnDisplayAuctionNounId(nounIdNumber));
       dispatch(setLastAuctionNounId(nounIdNumber));
     };
@@ -197,30 +185,31 @@ const PastAuctions: React.FC = () => {
   return <></>;
 };
 
-ReactDOM.render(
-  <Provider store={store}>
-    <ConnectedRouter history={history}>
-      <ChainSubscriber />
-      <React.StrictMode>
-        <Web3ReactProvider
-          getLibrary={
-            provider => new Web3Provider(provider) // this will vary according to whether you use e.g. ethers or web3.js
-          }
-        >
-          <ApolloProvider client={client}>
-            <PastAuctions />
-            <DAppProvider config={useDappConfig}>
+const container = document.getElementById('root');
+const root = createRoot(container!);
+
+root.render(
+  <React.StrictMode>
+    <Provider store={store}>
+      <BrowserRouter future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}>
+        {/* <ChainSubscriber /> */}
+        <WagmiProvider config={wagmiConfig}>
+          <QueryClientProvider client={queryClient}>
+            <ApolloProvider client={client}>
+              <PastAuctions />
               <LanguageProvider>
                 <App />
               </LanguageProvider>
               <Updaters />
-            </DAppProvider>
-          </ApolloProvider>
-        </Web3ReactProvider>
-      </React.StrictMode>
-    </ConnectedRouter>
-  </Provider>,
-  document.getElementById('root'),
+            </ApolloProvider>
+          </QueryClientProvider>
+        </WagmiProvider>
+      </BrowserRouter>
+    </Provider>
+  </React.StrictMode>,
 );
 
 // If you want to start measuring performance in your app, pass a function
